@@ -1,0 +1,5 @@
+contiki-*
+obj_*
+*.native
+*.sky
+symbols.*
