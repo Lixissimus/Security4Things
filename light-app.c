@@ -42,24 +42,93 @@
 #define PRINTF(...)
 #endif /* DEBUG */
 
+#define CAPTURE_FREQUENCY 5
+
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
+
+int window[50];
+int recorded = 0, threshold = -1;
+int calibrated = 0;
+
+void calibrate(int newValue) {
+  int min = 10000, max = -1;
+  int i;
+
+  if (recorded < 50) {
+    printf("Calibration value: %d\n", newValue);
+    window[recorded] = newValue;
+    recorded++;
+    return;
+  }
+  
+  for (i = 0; i < sizeof(window) / sizeof(int); i++) {
+    if (window[i] < min) min = window[i];
+    if (window[i] > max) max = window[i];
+  }
+
+  threshold = (min + max) / 2;
+  calibrated = 1;
+
+  printf("Calibration finished, threshold=%d\n", threshold);
+}
+
+int getBinaryValue(int intValue) {
+  if (calibrated == 0) {
+    printf("Cannot get binary value, not calibrated yet\n");
+    return -1;
+  }
+
+  if (intValue < threshold) return 0;
+  return 1;
+}
+
+void onNewLightValue(int value) {
+  int binaryValue;
+
+  if (calibrated == 0) {
+    calibrate(value);
+    return;
+  }
+
+  binaryValue = getBinaryValue(value);
+  printf("Received %d (%d)\n", binaryValue, value);
+}
 
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(light_app_process, ev, data)
 {
   static struct etimer et;
+  int i;
 
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(light_sensor);
 
-  while(1) {
-    etimer_set(&et, CLOCK_SECOND); 
+  printf("Countdown for calibration...");
+  // why doesn't that work ??
+  i = 3;
+  while (i > 0) {
+    etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
-        light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
+    printf(" %d...", i);
+    i-=1;
+  }
+  printf("go!\n");
+  // ??
+
+
+  while(1) {
+    etimer_set(&et, CLOCK_SECOND / CAPTURE_FREQUENCY); 
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+    int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
+    onNewLightValue(value);
+
+
+    // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
+        // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
   
   PROCESS_END();
