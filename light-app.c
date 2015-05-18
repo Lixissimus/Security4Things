@@ -56,7 +56,7 @@ void calibrate(int newValue) {
   int i;
 
   if (recorded < 50) {
-    printf("Calibration value: %d\n", newValue);
+    PRINTF("Calibration value: %d\n", newValue);
     window[recorded] = newValue;
     recorded++;
     return;
@@ -70,12 +70,12 @@ void calibrate(int newValue) {
   threshold = (min + max) / 2;
   calibrated = 1;
 
-  printf("Calibration finished, threshold=%d\n", threshold);
+  PRINTF("Calibration finished, threshold=%d\n", threshold);
 }
 
 int getBinaryValue(int intValue) {
   if (calibrated == 0) {
-    printf("Cannot get binary value, not calibrated yet\n");
+    PRINTF("Cannot get binary value, not calibrated yet\n");
     return -1;
   }
 
@@ -92,7 +92,7 @@ void onNewLightValue(int value) {
   }
 
   binaryValue = getBinaryValue(value);
-  printf("Received %d (%d)\n", binaryValue, value);
+  PRINTF("Received %d (%d)\n", binaryValue, value);
 }
 
 
@@ -106,16 +106,16 @@ PROCESS_THREAD(light_app_process, ev, data)
 
   SENSORS_ACTIVATE(light_sensor);
 
-  printf("Countdown for calibration...");
+  PRINTF("Countdown for calibration...");
   // why doesn't that work ??
   i = 3;
   while (i > 0) {
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    printf(" %d...", i);
+    PRINTF(" %d...", i);
     i-=1;
   }
-  printf("go!\n");
+  PRINTF("go!\n");
   // ??
 
 
