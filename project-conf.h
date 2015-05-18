@@ -7,6 +7,6 @@
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC      nullmac_driver
 #undef UIP_CONF_TCP
-#define UIP_CONF_TCP           0
+#define UIP_CONF_TCP           1
 
 #endif /* PROJECT_CONF_H_ */
