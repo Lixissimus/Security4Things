@@ -42,7 +42,7 @@
 #define PRINTF(...)
 #endif /* DEBUG */
 
-#define CAPTURE_FREQUENCY 5
+#define CAPTURE_FREQUENCY 5 // /s
 
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
@@ -100,24 +100,20 @@ void onNewLightValue(int value) {
 PROCESS_THREAD(light_app_process, ev, data)
 {
   static struct etimer et;
-  int i;
+  static int i;
 
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(light_sensor);
 
   PRINTF("Countdown for calibration...");
-  // why doesn't that work ??
   i = 3;
-  while (i > 0) {
+  for (i = 3; i >= 0; i--) {
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     PRINTF(" %d...", i);
-    i-=1;
   }
   PRINTF("go!\n");
-  // ??
-
 
   while(1) {
     etimer_set(&et, CLOCK_SECOND / CAPTURE_FREQUENCY); 
