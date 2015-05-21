@@ -30,9 +30,12 @@
  *
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include "light-app.h"
 #include "sys/etimer.h"
 #include "dev/light-sensor.h"
+#include "helper.h"
 
 #define DEBUG 1
 #if DEBUG
@@ -95,6 +98,42 @@ void onNewLightValue(int value) {
   PRINTF("Received %d (%d)\n", binaryValue, value);
 }
 
+char* binaryStringToASCII(const char* binaryString) {
+  int i, j;
+  int binaryLength, asciiLength, bitsPerChar, offset, charNum, digit;
+
+  bitsPerChar = sizeof(char) * 8;
+
+  binaryLength = strlen(binaryString);
+  // check whether the binary string has reasonable amount of bits
+  if (binaryLength % bitsPerChar != 0) {
+    PRINTF("Binary string does not have a valid length");
+    return NULL;
+  }
+
+  asciiLength = binaryLength / bitsPerChar;
+
+  // allocate memory for the result: #asciiLength chars + null-byte
+  char* asciiString = (char*)malloc(sizeof(char) * (asciiLength + 1));
+
+  for (i = 0; i < asciiLength; i++) {
+    charNum = 0;
+    offset = i * bitsPerChar;
+    // loop over bits that form a char
+    for (j = 0; j < bitsPerChar; j++) {
+      // this converts char '0' or '1' to an int (0 or 1)
+      digit = binaryString[j + offset] - '0';
+      // shift the bit to its appropriate position and add to previous result
+      charNum += digit << (bitsPerChar - j - 1);
+    };
+
+    asciiString[i] = charNum;
+  }
+  // finish the string
+  asciiString[asciiLength] = '\0';
+
+  return asciiString;
+}
 
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(light_app_process, ev, data)
@@ -121,10 +160,6 @@ PROCESS_THREAD(light_app_process, ev, data)
 
     int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
     onNewLightValue(value);
-
-
-    // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
-        // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
   
   PROCESS_END();

@@ -30,20 +30,13 @@
  *
  */
 
-#ifndef LIGHT_APP_H_
-#define LIGHT_APP_H_
 
-#include "contiki.h"
-
-PROCESS_NAME(light_app_process);
+#ifndef LIGHT_APP_H_HELPER_
+#define LIGHT_APP_H_HELPER_
 
 /*
- * Converts a string consisting of "0"s and "1"s to an ascii string.
- * The length of the binary string must be a multiple of sizeof(char) * 8,
- * else NULL is returned.
- * i.e. "010000010100001001000011" -> ABC
- * REMEMBER TO FREE THE RETURNED BUFFER AT SOME POINT!!
+ * returns x to the power of y
  */
-char* binaryStringToASCII(const char*);
+double pow(double x, double y);
 
-#endif /* LIGHT_APP_H_ */
+#endif /* LIGHT_APP_H_HELPER_ */
