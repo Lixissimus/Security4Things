@@ -100,32 +100,38 @@ void onNewLightValue(int value) {
 PROCESS_THREAD(light_app_process, ev, data)
 {
   static struct etimer et;
-  static int i;
+  static int i, nrTests;
+  static clock_time_t startTime, endTime;
+  static float result;
 
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(light_sensor);
 
-  PRINTF("Countdown for calibration...");
-  i = 3;
-  for (i = 3; i >= 0; i--) {
-    etimer_set(&et, CLOCK_SECOND);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    PRINTF(" %d...", i);
-  }
-  PRINTF("go!\n");
+  // PRINTF("Countdown for calibration...");
+  // i = 3;
+  // for (i = 3; i >= 0; i--) {
+  //   etimer_set(&et, CLOCK_SECOND);
+  //   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+  //   PRINTF(" %d...", i);
+  // }
+  // PRINTF("go!\n");
 
-  while(1) {
-    etimer_set(&et, CLOCK_SECOND / CAPTURE_FREQUENCY); 
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
+
+  PRINTF("start measuring\n");
+
+  nrTests = 30000;
+  startTime = clock_time(); // clock_time measured in clock seconds
+  for (i = 0; i < nrTests; i++) {
     int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
-    onNewLightValue(value);
-
-
-    // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
-        // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
+  endTime = clock_time();
+
+  result = (float)(endTime - startTime) / (nrTests * CLOCK_SECOND);
+
+  PRINTF("avg time difference: %de-7 seconds\n", (int)(result * 10000000));
+  PRINTF("that means %lu measures per second\n", (long)(1/result));
   
   PROCESS_END();
 }
