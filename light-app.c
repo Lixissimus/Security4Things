@@ -47,12 +47,20 @@
 
 #define CAPTURE_FREQUENCY 5 // /s
 
+enum Phase { CALIBRATE, SYNCHRONIZE, INIT, SEND };
+
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
 
+//SYNCHRONIZE
+int lastSyncValue = -1;
+clock_time_t syncStartTime, periodLength;
+
+// SEND
 int window[50];
 int recorded = 0, threshold = -1;
-int calibrated = 0;
+
+enum Phase phase = CALIBRATE;
 
 void calibrate(int newValue) {
   int min = 10000, max = -1;
@@ -71,13 +79,13 @@ void calibrate(int newValue) {
   }
 
   threshold = (min + max) / 2;
-  calibrated = 1;
+  phase = SYNCHRONIZE;
 
   PRINTF("Calibration finished, threshold=%d\n", threshold);
 }
 
 int getBinaryValue(int intValue) {
-  if (calibrated == 0) {
+  if (threshold == -1) {
     PRINTF("Cannot get binary value, not calibrated yet\n");
     return -1;
   }
@@ -86,16 +94,27 @@ int getBinaryValue(int intValue) {
   return 1;
 }
 
+void synchronize(int value) {
+  int syncValue = getBinaryValue(value);
+
+  if (lastSyncValue != -1 && syncValue != lastSyncValue) {
+    if (syncStartTime) {
+      periodLength = clock_time() - syncStartTime;
+      phase = SEND;
+      PRINTF("Synchronization finished, periodLength=%d clock ticks, %lums\n", (int) periodLength,
+        ((long) periodLength) * 1000 / CLOCK_SECOND);
+    }
+    syncStartTime = clock_time();
+  }
+
+  lastSyncValue = syncValue;
+}
+
 void onNewLightValue(int value) {
   int binaryValue;
 
-  if (calibrated == 0) {
-    calibrate(value);
-    return;
-  }
-
   binaryValue = getBinaryValue(value);
-  PRINTF("Received %d (%d)\n", binaryValue, value);
+  //PRINTF("Received %d (%d)\n", binaryValue, value);
 }
 
 char* binaryStringToASCII(const char* binaryString) {
@@ -155,11 +174,29 @@ PROCESS_THREAD(light_app_process, ev, data)
   PRINTF("go!\n");
 
   while(1) {
-    etimer_set(&et, CLOCK_SECOND / CAPTURE_FREQUENCY); 
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
-    onNewLightValue(value);
+
+    int waitTime = 0;
+    if (phase == CALIBRATE) {
+      calibrate(value);
+      waitTime = CLOCK_SECOND / CAPTURE_FREQUENCY;
+    } else if (phase == SYNCHRONIZE) {
+      synchronize(value);
+      waitTime = 1;
+    } else if (phase == INIT) {
+      // init
+    } else if (phase == SEND) {
+      onNewLightValue(value);
+      waitTime = CLOCK_SECOND / CAPTURE_FREQUENCY;
+    }
+
+    etimer_set(&et, waitTime);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+
+    // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
+        // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
   
   PROCESS_END();
