@@ -37,4 +37,29 @@
 
 PROCESS_NAME(light_app_process);
 
+/*
+ * Gathers values from the light sensor and computes their mean value which
+ * is then used as a threshold to distinguish between 0 and 1 bits.
+ */
+void calibrate(int);
+
+/*
+ * Returns the binary value for a value from the light sensor according to the
+ * threshold that was computed during the calibration.
+ */
+int getBinaryValue(int);
+
+/*
+ * Detects the first bit switch and computes the time difference to the next
+ * bit switch, which is the time each bit is transmitted for. Saves the
+ * time of a bit switch in syncStartTime and the transmission time in periodLength.
+ */
+void synchronize(int);
+
+/*
+ * Does stuff with the data.
+ */
+void onNewLightValue(int);
+
+
 #endif /* LIGHT_APP_H_ */
