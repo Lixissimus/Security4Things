@@ -1,0 +1,20 @@
+Max light sensor measures
+=========================
+
+- measures one value every ~8.0e-6 seconds
+- this means ~125,000 measures/second
+
+results produced by following code:
+```
+nrTests = 30000;
+startTime = clock_time(); // clock_time measured in clock seconds
+for (i = 0; i < nrTests; i++) {
+	int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
+}
+endTime = clock_time();
+
+result = (float)(endTime - startTime) / (nrTests * CLOCK_SECOND);
+
+PRINTF("avg time difference: %de-7 seconds\n", (int)(result * 10000000));
+PRINTF("that means %lu measures per second\n", (long)(1/result));
+```
