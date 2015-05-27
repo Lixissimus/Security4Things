@@ -18,3 +18,10 @@ result = (float)(endTime - startTime) / (nrTests * CLOCK_SECOND);
 PRINTF("avg time difference: %de-7 seconds\n", (int)(result * 10000000));
 PRINTF("that means %lu measures per second\n", (long)(1/result));
 ```
+
+
+Javascript self synchronizing timer
+===================================
+Hello World! sending example, error offset on idle system between first and last bit sent:
+standard timeout: 70ms
+synchronized: 22ms
