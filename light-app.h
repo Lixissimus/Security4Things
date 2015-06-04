@@ -66,8 +66,13 @@ int getBinaryValue(int);
 void synchronize(int);
 
 /*
+ * Detects the init pattern, to know when the data is being sent.
+ */
+ void init(int);
+
+/*
  * Does stuff with the data.
  */
-void onNewLightValue(int);
+void read(int);
 
 #endif /* LIGHT_APP_H_ */
