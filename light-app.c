@@ -47,7 +47,7 @@
 
 #define CAPTURE_FREQUENCY 20 // /s
 
-enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ };
+enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ, VERIFY };
 
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
@@ -57,7 +57,6 @@ int window[50];
 int recorded = 0, threshold = -1;
 
 // SYNCHRONIZE
-int periodLengths[5];
 int periodsMeasured = 0;
 int lastSyncValue = -1;
 clock_time_t syncStartTime, periodLength;
@@ -105,31 +104,23 @@ int getBinaryValue(int intValue) {
 }
 
 void synchronize(int value) {
-  int i;
   int syncValue = getBinaryValue(value);
 
   if (lastSyncValue != -1 && syncValue != lastSyncValue) {
     if (syncStartTime) {
-      periodLength = clock_time() - syncStartTime;
-
-      if (periodsMeasured == 5) {
-        periodLength = 0;
-        for (i = 0; i < 5; i++) {
-          periodLength += periodLengths[i];
-        }
-        periodLength /= 5;
+      if (periodsMeasured == 20) {
+        periodLength = clock_time() - syncStartTime;
+        periodLength /= 20;
 
         PRINTF("Synchronization finished, periodLength=%d clock ticks, %lums\n", (int) periodLength,
           ((long) periodLength) * 1000 / CLOCK_SECOND);
         phase = INIT;
       } else {
-        periodLengths[periodsMeasured] = periodLength;
-        PRINTF("Measured periodLength: %lums\n", ((long) periodLength) * 1000 / CLOCK_SECOND);
-        syncStartTime = clock_time();
         periodsMeasured += 1;
       }
+    } else {
+      syncStartTime = clock_time();
     }
-    syncStartTime = clock_time();
   }
 
   lastSyncValue = syncValue;
@@ -141,7 +132,7 @@ void init(int value) {
   last8bits = last8bits << 1;
   last8bits += initValue;
 
-  PRINTF("received %d - last8bits, %u\n", initValue, last8bits);
+  PRINTF("received %d\n", initValue);
 
   if (last8bits == INIT_PATTERN) {
     PRINTF("Initialization finished\n");
@@ -157,9 +148,14 @@ void read(int value) {
   bitsRead += 1;
 
   if (bitsRead == 8) {
-    PRINTF("%c", curChar);
-    bitsRead = 0;
-    curChar = '\0';
+    // For now terminate once a null-byte was received
+    if (curChar == 0) {
+      phase = VERIFY;
+    } else {
+      PRINTF("%c", curChar);
+      bitsRead = 0;
+      curChar = '\0';
+    }
   }
 }
 
@@ -225,24 +221,33 @@ PROCESS_THREAD(light_app_process, ev, data)
 
     int waitTime = 0;
     if (phase == CALIBRATE) {
-      calibrate(value);
       waitTime = CLOCK_SECOND / CAPTURE_FREQUENCY;
+      etimer_set(&et, waitTime);
+      calibrate(value);
     } else if (phase == SYNCHRONIZE) {
+      waitTime = 1;
+      etimer_set(&et, waitTime);
+      int startTime = clock_time();
       synchronize(value);
       if (phase == INIT) {
-        waitTime = periodLength / 2;
-      } else {
-        waitTime = 1;
+        int execTime = clock_time() - startTime;
+        waitTime = (periodLength - execTime) / 2;
+        etimer_set(&et, waitTime);
       }
     } else if (phase == INIT) {
+      waitTime = periodLength;
+      etimer_set(&et, waitTime);
       init(value);
-      waitTime = periodLength;
     } else if (phase == READ) {
-      read(value);
       waitTime = periodLength;
+      etimer_set(&et, waitTime);
+      read(value);
+    } else if (phase == VERIFY) {
+      waitTime = CLOCK_SECOND;
+      etimer_set(&et, waitTime);
     }
 
-    etimer_set(&et, waitTime);
+    //etimer_set(&et, waitTime);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
 
