@@ -76,7 +76,7 @@ void calibrate(int newValue) {
   int i;
 
   if (recorded < 50) {
-    PRINTF("Calibration value: %d\n", newValue);
+    PRINTF("%d ", newValue);
     window[recorded] = newValue;
     recorded++;
     return;
@@ -90,7 +90,7 @@ void calibrate(int newValue) {
   threshold = (min + max) / 2;
   phase = SYNCHRONIZE;
 
-  PRINTF("Calibration finished, threshold=%d\n", threshold);
+  PRINTF("\nCalibration finished, threshold is %d\n\n", threshold);
 }
 
 int getBinaryValue(int intValue) {
@@ -108,15 +108,15 @@ void synchronize(int value) {
 
   if (lastSyncValue != -1 && syncValue != lastSyncValue) {
     if (syncStartTime) {
+      periodsMeasured += 1;
       if (periodsMeasured == 20) {
         periodLength = clock_time() - syncStartTime;
-        periodLength /= 20;
+        // round correctly
+        periodLength = (int) (((float) periodLength) / 20 + 0.5);
 
-        PRINTF("Synchronization finished, periodLength=%d clock ticks, %lums\n", (int) periodLength,
+        PRINTF("Synchronization finished, periodLength is %d clock ticks, which is %lums\n\n", (int) periodLength,
           ((long) periodLength) * 1000 / CLOCK_SECOND);
         phase = INIT;
-      } else {
-        periodsMeasured += 1;
       }
     } else {
       syncStartTime = clock_time();
@@ -132,10 +132,10 @@ void init(int value) {
   last8bits = last8bits << 1;
   last8bits += initValue;
 
-  PRINTF("received %d\n", initValue);
+  PRINTF("%d", initValue);
 
   if (last8bits == INIT_PATTERN) {
-    PRINTF("Initialization finished\n");
+    PRINTF("\nInitialization finished\n\n");
     phase = READ;
   }
 }
@@ -213,7 +213,7 @@ PROCESS_THREAD(light_app_process, ev, data)
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     PRINTF(" %d...", i);
   }
-  PRINTF("go!\n");
+  PRINTF("go!\n\nCalibration values:\n");
 
   while(1) {
 
