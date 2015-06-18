@@ -38,6 +38,11 @@
 PROCESS_NAME(light_app_process);
 
 /*
+ * Deactivates all other LEDs and activates the ones in the parameter.
+ */
+void activateLED(unsigned char);
+
+/*
  * Converts a string consisting of "0"s and "1"s to an ascii string.
  * The length of the binary string must be a multiple of sizeof(char) * 8,
  * else NULL is returned.

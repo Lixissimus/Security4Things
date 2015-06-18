@@ -46,8 +46,12 @@
 #endif /* DEBUG */
 
 #define CAPTURE_FREQUENCY 20 // /s
+#define LEDS_GREEN    1
+#define LEDS_BLUE     2
+#define LEDS_RED      4
+#define LEDS_ALL      7
 
-enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ, VERIFY };
+enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ, VERIFY, EXIT };
 
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
@@ -70,6 +74,11 @@ unsigned char curChar = '\0';
 int bitsRead = 0;
 
 enum Phase phase = CALIBRATE;
+
+void activateLED(unsigned char ledv) {
+  leds_off(LEDS_ALL);
+  leds_on(ledv);
+}
 
 void calibrate(int newValue) {
   int min = 10000, max = -1;
@@ -136,6 +145,7 @@ void init(int value) {
 
   if (last8bits == INIT_PATTERN) {
     PRINTF("\nInitialization finished\n\n");
+    activateLED(LEDS_BLUE);
     phase = READ;
   }
 }
@@ -243,12 +253,20 @@ PROCESS_THREAD(light_app_process, ev, data)
       etimer_set(&et, waitTime);
       read(value);
     } else if (phase == VERIFY) {
-      waitTime = CLOCK_SECOND;
+      // wait x seconds before terminating
+      waitTime = 10 * CLOCK_SECOND;
       etimer_set(&et, waitTime);
+      // call to verification function
+      // activate LEDS_GREEN or LEDS_RED based on return value
+      activateLED(LEDS_GREEN);
+      phase = EXIT;
+    } else if (phase == EXIT) {
+      leds_off(LEDS_ALL);
     }
 
-    //etimer_set(&et, waitTime);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    if (waitTime != 0) {
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    }
 
 
     // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
