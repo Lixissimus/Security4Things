@@ -30,13 +30,31 @@
  *
  */
 
+#ifndef K_MEANS_
+#define K_MEANS_
 
-#ifndef LIGHT_APP_H_HELPER_
-#define LIGHT_APP_H_HELPER_
+typedef struct {
+	int *elements;
+	int nrElements;
+} Cluster;
+
+typedef struct {
+	int *centers;
+	int k;
+} KMeans;
 
 /*
- * returns x to the power of y
+ * Expects an int array of data values, the number of data values, 
+ * the number of clusters to generate
+ * and a pointer to a KMeans structure to store the result.
  */
-double pow(double x, double y);
+void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans);
 
-#endif /* LIGHT_APP_H_HELPER_ */
+/*
+ * Given a value and a pointer to a KMeans structure, it returns
+ * the best class for the value. The KMeans structure should be 
+ * created using buildClusters
+ */
+int classify(int value, KMeans *p_kmeans);
+
+#endif /* K_MEANS_ */

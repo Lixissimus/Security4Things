@@ -1,4 +1,5 @@
 DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
+PROJECT_SOURCEFILES += k-means.c
 CONTIKI_PROJECT=light-app
 all: $(CONTIKI_PROJECT)
 CONTIKI=contiki

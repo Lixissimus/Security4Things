@@ -35,7 +35,7 @@
 #include "light-app.h"
 #include "sys/etimer.h"
 #include "dev/light-sensor.h"
-#include "helper.h"
+#include "k-means.h"
 
 #define DEBUG 1
 #if DEBUG
@@ -46,6 +46,10 @@
 #endif /* DEBUG */
 
 #define CAPTURE_FREQUENCY 20 // /s
+// number of clusters to classify light values
+#define K_CLUSTERS 2
+// number of values to build kmeans clusters
+#define KMEANS_VALUES 50
 
 enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ, VERIFY };
 
@@ -53,8 +57,9 @@ PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
 
 // CALIBRATE
-int window[50];
+int window[KMEANS_VALUES];
 int recorded = 0, threshold = -1;
+KMeans kmeans;
 
 // SYNCHRONIZE
 int periodsMeasured = 0;
@@ -72,35 +77,28 @@ int bitsRead = 0;
 enum Phase phase = CALIBRATE;
 
 void calibrate(int newValue) {
-  int min = 10000, max = -1;
   int i;
 
-  if (recorded < 50) {
+  if (recorded < KMEANS_VALUES) {
     PRINTF("%d ", newValue);
     window[recorded] = newValue;
     recorded++;
     return;
   }
-  
-  for (i = 0; i < sizeof(window) / sizeof(int); i++) {
-    if (window[i] < min) min = window[i];
-    if (window[i] > max) max = window[i];
-  }
 
-  threshold = (min + max) / 2;
+  buildClusters(window, KMEANS_VALUES, K_CLUSTERS, &kmeans);
+
   phase = SYNCHRONIZE;
 
-  PRINTF("\nCalibration finished, threshold is %d\n\n", threshold);
+  PRINTF("\nCalibration finished, cluster means are:");
+  for (i = 0; i < kmeans.k; i++) {
+    PRINTF(" %d", kmeans.centers[i]);
+  }
+  PRINTF("\n");
 }
 
 int getBinaryValue(int intValue) {
-  if (threshold == -1) {
-    PRINTF("Cannot get binary value, not calibrated yet\n");
-    return -1;
-  }
-
-  if (intValue < threshold) return 0;
-  return 1;
+  return classify(intValue, &kmeans);
 }
 
 void synchronize(int value) {
@@ -206,7 +204,7 @@ PROCESS_THREAD(light_app_process, ev, data)
 
   SENSORS_ACTIVATE(light_sensor);
 
-  PRINTF("Countdown for calibration...");
+  PRINTF("NEW Countdown for calibration...");
   i = 3;
   for (i = 3; i >= 0; i--) {
     etimer_set(&et, CLOCK_SECOND);
