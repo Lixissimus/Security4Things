@@ -204,7 +204,7 @@ PROCESS_THREAD(light_app_process, ev, data)
 
   SENSORS_ACTIVATE(light_sensor);
 
-  PRINTF("NEW Countdown for calibration...");
+  PRINTF("Countdown for calibration...");
   i = 3;
   for (i = 3; i >= 0; i--) {
     etimer_set(&et, CLOCK_SECOND);
@@ -252,6 +252,9 @@ PROCESS_THREAD(light_app_process, ev, data)
     // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
         // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
+
+  // this memory was allocated in buildClusters and needs to be freed
+  free(kmeans.centers)
   
   PROCESS_END();
 }

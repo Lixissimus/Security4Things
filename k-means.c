@@ -44,8 +44,7 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
 	}
 
 	p_kmeans->k = k;
-	int centers[k];
-	p_kmeans->centers = centers;
+	p_kmeans->centers = (int*) malloc(k * sizeof(int));
 	
 	// actually take random samples
 	for (i = 0; i < k; i++) {
@@ -124,3 +123,17 @@ int classify(int value, KMeans *p_kmeans) {
 
 	return bestCluster;
 }
+
+// int main(int argc, char const *argv[]) {
+// 	int testData[50] = {143, 132, 129, 146, 143, 124, 111, 109, 134, 135, 124, 107, 107, 127, 137, 137, 112, 112, 128, 139, 139, 116, 113, 115, 141, 141, 142, 115, 116, 139, 142, 144, 116, 118, 119, 143, 143, 117, 117, 118, 142, 142, 135, 118, 117, 133, 144, 143, 118, 119};
+// 	int i;
+// 	KMeans kmeans;
+// 	buildClusters(testData, 50, 2, &kmeans);
+// 	printf("Calibration finished, cluster means are:");
+//   for (i = 0; i < kmeans.k; i++) {
+//     printf(" %d", kmeans.centers[i]);
+//   }
+//   printf("\n");
+//   free(kmeans.centers);
+// 	return 0;
+// }
