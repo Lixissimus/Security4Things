@@ -34,8 +34,32 @@
 #include <stdio.h>
 #include "k-means.h"
 
+// simple bubble sort
+void sort(int *data, int length) {
+	int i, tmp, changed = 1;
+	while (changed) {
+		changed = 0;
+		for (i = 0; i < length - 1; i++) {
+			if (data[i] > data[i+1]) {
+				tmp = data[i];
+				data[i] = data[i+1];
+				data[i+1] = tmp;
+				changed = 1;
+			}
+		}
+	}
+}
+
+int isInArray(int *data, int length, int element) {
+	int i;
+	for (i = 0; i < length; i++) {
+		if (data[i] == element) return 1;
+	}
+	return 0;
+}
+
 void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
-	int i, j, changed;
+	int i, j, changed, initCenter;
 	Cluster clusters[k];
 
 	if (k > nrData) {
@@ -45,15 +69,26 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
 
 	p_kmeans->k = k;
 	p_kmeans->centers = (int*) malloc(k * sizeof(int));
+
+	for (i = 0; i < k; i++) {
+		p_kmeans->centers[i] = -1;
+	}
 	
-	// actually take random samples
+	j = 0;
 	for (i = 0; i < k; i++) {
 		// Create empty elements array, that could contain all elements.
 		// Could be memory-optimized by using realloc or different data structure 
 		// for data elements, but as long as we don't have
 		// too many clusters or too many data points, this should be fine.
 		clusters[i].elements = (int*) malloc(nrData * sizeof(int));
-		p_kmeans->centers[i] = data[i];
+		// Initialize the centers with distict values
+		initCenter = data[j];
+		while (isInArray(p_kmeans->centers, k, initCenter)) {
+			j++;
+			initCenter = data[j];
+		}
+		p_kmeans->centers[i] = initCenter;
+		j++;
 	}
 
 	changed = 1;
@@ -107,7 +142,8 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
 		printf("\n");
 	}
 
-	// we should have converged here. yay!
+	// sort the centers
+	sort(p_kmeans->centers, k);
 }
 
 int classify(int value, KMeans *p_kmeans) {
@@ -123,17 +159,3 @@ int classify(int value, KMeans *p_kmeans) {
 
 	return bestCluster;
 }
-
-// int main(int argc, char const *argv[]) {
-// 	int testData[50] = {143, 132, 129, 146, 143, 124, 111, 109, 134, 135, 124, 107, 107, 127, 137, 137, 112, 112, 128, 139, 139, 116, 113, 115, 141, 141, 142, 115, 116, 139, 142, 144, 116, 118, 119, 143, 143, 117, 117, 118, 142, 142, 135, 118, 117, 133, 144, 143, 118, 119};
-// 	int i;
-// 	KMeans kmeans;
-// 	buildClusters(testData, 50, 2, &kmeans);
-// 	printf("Calibration finished, cluster means are:");
-//   for (i = 0; i < kmeans.k; i++) {
-//     printf(" %d", kmeans.centers[i]);
-//   }
-//   printf("\n");
-//   free(kmeans.centers);
-// 	return 0;
-// }

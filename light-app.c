@@ -254,7 +254,7 @@ PROCESS_THREAD(light_app_process, ev, data)
   }
 
   // this memory was allocated in buildClusters and needs to be freed
-  free(kmeans.centers)
+  free(kmeans.centers);
   
   PROCESS_END();
 }
