@@ -221,6 +221,8 @@ PROCESS_THREAD(light_app_process, ev, data)
     etimer_set(&et, CLOCK_SECOND);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     PRINTF(" %d...", i);
+    // Activate LEDs in the following order: Red, Blue, Green
+    activateLED(1 << (i-1));
   }
   PRINTF("go!\n\nCalibration values:\n");
 
