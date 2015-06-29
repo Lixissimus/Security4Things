@@ -33,6 +33,8 @@
 #ifndef HAMMING_
 #define HAMMING_
 
+enum result {NO_BIT_ERROR, ONE_BIT_ERROR, TWO_BIT_ERROR};
+
 int detectAndCorrectError(int* codeword);
 
 #endif /* HAMMING_ */

@@ -30,7 +30,7 @@
  *
  */
 
-// #include "hamming.h"
+#include "hamming.h"
 #include <stdio.h>
 #define ROWS 4
 #define COLS 8
@@ -63,27 +63,27 @@ int detectAndCorrectError(int* codeword) {
 
 	if (error == 0 && parity == 0) {
 		// everything was transmitted correctly, or no error can be detected
-		return 0;
+		return NO_BIT_ERROR;
 	} else if (error != 0 && parity == 1) {
 		// error can be corrected by negation 
 		codeword[error-1] = codeword[error-1] ^ 1;
-		return 0;
+		return ONE_BIT_ERROR;
 	} else if (error == 0 && parity == 1) {
 		// error in parity bit of codeword
 		codeword[7] = codeword[7] ^ 1;
-		return 0;
+		return ONE_BIT_ERROR;
 	} else {
 		// (error !=0 && parity == 0)
 		// 2 bit error, cannot be corrected
-		return 1;
+		return TWO_BIT_ERROR;
 	}
 }
 
 void main(int argc, char* argv) {
-	int test[8] = {0,0,1,0,0,0,1,1};
+	int test[8] = {1,0,1,0,0,0,1,1};
 	int res = detectAndCorrectError(test);
 	int i;
-	if (res) printf("cannot correct error\n");
+	if (res == TWO_BIT_ERROR) printf("cannot correct error\n");
 	for (i = 0; i < 8; i++) {
 		printf("%d", test[i]);
 	}
