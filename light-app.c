@@ -226,7 +226,7 @@ PROCESS_THREAD(light_app_process, ev, data)
   }
   PRINTF("go!\n\nCalibration values:\n");
 
-  while(1) {
+  while(phase != EXIT) {
 
     int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
 
@@ -261,18 +261,15 @@ PROCESS_THREAD(light_app_process, ev, data)
       // activate LEDS_GREEN or LEDS_RED based on return value
       activateLED(LEDS_GREEN);
       phase = EXIT;
-    } else if (phase == EXIT) {
-      leds_off(LEDS_ALL);
     }
 
-    if (waitTime != 0) {
-      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    }
-
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
         // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
+
+  leds_off(LEDS_ALL);
 
   // this memory was allocated in buildClusters and needs to be freed
   free(kmeans.centers);
