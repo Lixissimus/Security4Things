@@ -172,10 +172,9 @@ void read(int value) {
 
     if (hammingError1 == TWO_BIT_ERROR || hammingError2 == TWO_BIT_ERROR) {
       // error cannot be corrected
-      PRINTF("Error while transmission, detected by hamming code\n");
+      PRINTF("\nError while transmission, detected by hamming code\n");
     } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
       // error was corrected
-      // PRINTF("Hamming code applied for bit correction\n");
     }
 
     // decode the hamming codes into the bits of the transmitted character
@@ -212,41 +211,6 @@ char binaryStringToASCII(const unsigned char* binaryString) {
   }
 
   return charNum;
-
-  // int i, j;
-  // int binaryLength, asciiLength, bitsPerChar, offset, charNum, digit;
-
-  // bitsPerChar = sizeof(char) * 8;
-
-  // binaryLength = strlen(binaryString);
-  // // check whether the binary string has reasonable amount of bits
-  // if (binaryLength % bitsPerChar != 0) {
-  //   PRINTF("Binary string does not have a valid length\n");
-  //   return NULL;
-  // }
-
-  // asciiLength = binaryLength / bitsPerChar;
-
-  // // allocate memory for the result: #asciiLength chars + null-byte
-  // char* asciiString = (char*)malloc(sizeof(char) * (asciiLength + 1));
-
-  // for (i = 0; i < asciiLength; i++) {
-  //   charNum = 0;
-  //   offset = i * bitsPerChar;
-  //   // loop over bits that form a char
-  //   for (j = 0; j < bitsPerChar; j++) {
-  //     // this converts char '0' or '1' to an int (0 or 1)
-  //     digit = binaryString[j + offset] - '0';
-  //     // shift the bit to its appropriate position and add to previous result
-  //     charNum += digit << (bitsPerChar - j - 1);
-  //   };
-
-  //   asciiString[i] = charNum;
-  // }
-  // // finish the string
-  // asciiString[asciiLength] = '\0';
-
-  // return asciiString;
 }
 
 /*---------------------------------------------------------------------------*/
