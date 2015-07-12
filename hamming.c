@@ -35,13 +35,14 @@
 #define ROWS 4
 #define COLS 8
 
-int detectAndCorrectError(int* codeword) {
+int detectAndCorrectError(unsigned char* codeword) {
  	// Return 0 if there was no error or if it was corrected, non-zero otherwise.
  	// Changes codeword array!
  	// Codeword should have structure: P0 P1 D0 P2 D1 D2 D3 P3
- 	int i, j, error, parity;
- 	int prod[ROWS];
-	const int controlMatrix[ROWS][COLS] = {
+ 	int i, j;
+ 	char error, parity;
+ 	char prod[ROWS];
+	const char controlMatrix[ROWS][COLS] = {
 		{1, 0, 1, 0, 1, 0, 1, 0},
 		{0, 1, 1, 0, 0, 1, 1, 0},
 		{0, 0, 0, 1, 1, 1, 1, 0},
@@ -79,13 +80,10 @@ int detectAndCorrectError(int* codeword) {
 	}
 }
 
-void main(int argc, char* argv) {
-	int test[8] = {1,0,1,0,0,0,1,1};
-	int res = detectAndCorrectError(test);
-	int i;
-	if (res == TWO_BIT_ERROR) printf("cannot correct error\n");
-	for (i = 0; i < 8; i++) {
-		printf("%d", test[i]);
-	}
-	printf("\n");
+void decode(unsigned char* hammingCode, unsigned char* output) {
+	// Codeword should have structure: P0 P1 D0 P2 D1 D2 D3 P3
+	output[0] = hammingCode[2];
+	output[1] = hammingCode[4];
+	output[2] = hammingCode[5];
+	output[3] = hammingCode[6];
 }

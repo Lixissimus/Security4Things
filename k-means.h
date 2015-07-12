@@ -55,6 +55,6 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans);
  * the best class for the value. The KMeans structure should be 
  * created using buildClusters
  */
-int classify(int value, KMeans *p_kmeans);
+unsigned char classify(int value, KMeans *p_kmeans);
 
 #endif /* K_MEANS_ */
