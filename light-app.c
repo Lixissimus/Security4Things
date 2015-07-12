@@ -173,6 +173,7 @@ void read(int value) {
     if (hammingError1 == TWO_BIT_ERROR || hammingError2 == TWO_BIT_ERROR) {
       // error cannot be corrected
       PRINTF("\nError while transmission, detected by hamming code\n");
+      phase = EXIT;
     } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
       // error was corrected
     }
