@@ -30,31 +30,13 @@
  *
  */
 
-#ifndef K_MEANS_
-#define K_MEANS_
+#ifndef HAMMING_
+#define HAMMING_
 
-typedef struct {
-	int *elements;
-	int nrElements;
-} Cluster;
+enum result {NO_BIT_ERROR, ONE_BIT_ERROR, TWO_BIT_ERROR};
 
-typedef struct {
-	int *centers;
-	int k;
-} KMeans;
+int detectAndCorrectError(unsigned char* codeword);
 
-/*
- * Expects an int array of data values, the number of data values, 
- * the number of clusters to generate
- * and a pointer to a KMeans structure to store the result.
- */
-void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans);
+void decode(unsigned char* hammingCode, unsigned char* output);
 
-/*
- * Given a value and a pointer to a KMeans structure, it returns
- * the best class for the value. The KMeans structure should be 
- * created using buildClusters
- */
-unsigned char classify(int value, KMeans *p_kmeans);
-
-#endif /* K_MEANS_ */
+#endif /* HAMMING_ */
