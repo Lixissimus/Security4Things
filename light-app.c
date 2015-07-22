@@ -86,6 +86,10 @@ void activateLED(unsigned char ledv) {
   leds_on(ledv);
 }
 
+int round(float num) {
+  return (int) (num + 0.5);
+}
+
 void calibrate(int newValue) {
   int i;
 
@@ -119,8 +123,7 @@ void synchronize(int value) {
       periodsMeasured += 1;
       if (periodsMeasured == 20) {
         periodLength = clock_time() - syncStartTime;
-        // round correctly
-        periodLength = (int) (((float) periodLength) / 20 + 0.5);
+        periodLength = round((float) periodLength / 20);
 
         PRINTF("Synchronization finished, periodLength is %d clock ticks, which is %lums\n\n", (int) periodLength,
           ((long) periodLength) * 1000 / CLOCK_SECOND);
@@ -242,7 +245,7 @@ PROCESS_THREAD(light_app_process, ev, data)
       synchronize(value);
       if (phase == INIT) {
         int execTime = clock_time() - startTime;
-        waitTime = (periodLength - execTime) / 2;
+        waitTime = periodLength - 2 - execTime;
         etimer_set(&et, waitTime);
       }
     } else if (phase == INIT) {
