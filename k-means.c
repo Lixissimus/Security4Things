@@ -146,8 +146,9 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
 	sort(p_kmeans->centers, k);
 }
 
-int classify(int value, KMeans *p_kmeans) {
-	int i, bestCluster = -1, minDist = 10000;
+unsigned char classify(int value, KMeans *p_kmeans) {
+	int minDist = 10000;
+	unsigned char i, bestCluster = -1;
 
 	for (i = 0; i < p_kmeans->k; i++) {
 		int dist = abs(p_kmeans->centers[i] - value);

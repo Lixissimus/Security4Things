@@ -36,6 +36,7 @@
 #include "sys/etimer.h"
 #include "dev/light-sensor.h"
 #include "k-means.h"
+#include "hamming.h"
 
 #define DEBUG 1
 #if DEBUG
@@ -68,14 +69,18 @@ KMeans kmeans;
 
 // SYNCHRONIZE
 int periodsMeasured = 0;
-int lastSyncValue = -1;
+unsigned char lastSyncValue = 255;
 clock_time_t syncStartTime, periodLength;
 
 // INIT
 unsigned char INIT_PATTERN = 'k'; // 01101011
+unsigned char INIT_PATTERN_HAMMING = 'h';
+
 unsigned char last8bits = '\0';
 
 // READ
+char useHamming = 0;
+unsigned char dataBuffer[16];
 unsigned char curChar = '\0';
 int bitsRead = 0;
 
@@ -111,14 +116,14 @@ void calibrate(int newValue) {
   PRINTF("\n");
 }
 
-int getBinaryValue(int intValue) {
+unsigned char getBinaryValue(int intValue) {
   return classify(intValue, &kmeans);
 }
 
 void synchronize(int value) {
-  int syncValue = getBinaryValue(value);
+  unsigned char syncValue = getBinaryValue(value);
 
-  if (lastSyncValue != -1 && syncValue != lastSyncValue) {
+  if (lastSyncValue != 255 && syncValue != lastSyncValue) {
     if (syncStartTime) {
       periodsMeasured += 1;
       if (periodsMeasured == 20) {
@@ -138,14 +143,17 @@ void synchronize(int value) {
 }
 
 void init(int value) {
-  int initValue = getBinaryValue(value);
+  unsigned char initValue = getBinaryValue(value);
 
   last8bits = last8bits << 1;
   last8bits += initValue;
 
   PRINTF("%d", initValue);
 
-  if (last8bits == INIT_PATTERN) {
+  if (last8bits == INIT_PATTERN || last8bits == INIT_PATTERN_HAMMING) {
+    if (last8bits == INIT_PATTERN_HAMMING) useHamming = 1;
+    // check here, if we received the init patter for active hamming code
+    // and set bitsToRead accordingly
     PRINTF("\nInitialization finished\n\n");
     activateLED(LEDS_BLUE);
     phase = READ;
@@ -153,59 +161,60 @@ void init(int value) {
 }
 
 void read(int value) {
-  int bitValue = getBinaryValue(value);
+  int i, hammingError1, hammingError2;
+  unsigned char charBits[8];
+  char readChar;
+  unsigned char bitValue = getBinaryValue(value);
 
-  curChar = curChar << 1;
-  curChar += bitValue;
-  bitsRead += 1;
+  dataBuffer[bitsRead] = bitValue;
+  if (useHamming && bitsRead == 16) {
+    // detectAndCorrectError just uses the first 8 elements of the given array
+    hammingError1 = detectAndCorrectError(dataBuffer);
+    // give it a pointer to the second half of the array
+    hammingError2 = detectAndCorrectError(&dataBuffer[8]);
 
-  if (bitsRead == 8) {
-    // For now terminate once a null-byte was received
-    if (curChar == 0) {
+    if (hammingError1 == TWO_BIT_ERROR || hammingError2 == TWO_BIT_ERROR) {
+      // error cannot be corrected
+      PRINTF("\nError while transmission, detected by hamming code\n");
+      phase = EXIT;
+    } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
+      // error was corrected
+    }
+
+    // decode the hamming codes into the bits of the transmitted character
+    decode(dataBuffer, charBits);
+    decode(&dataBuffer[8], &charBits[4]);
+    readChar = binaryStringToASCII(charBits);
+
+    if (readChar == 0) {
       phase = VERIFY;
     } else {
-      PRINTF("%c", curChar);
+      PRINTF("%c", readChar);
       bitsRead = 0;
-      curChar = '\0';
+    }
+  } else if (!useHamming && bitsRead == 8) {
+    readChar = binaryStringToASCII(dataBuffer);
+    if (readChar == 0) {
+      phase = VERIFY;
+    } else {
+      PRINTF("%c", readChar);
+      bitsRead = 0;
     }
   }
+
+  bitsRead++;
 }
 
-char* binaryStringToASCII(const char* binaryString) {
-  int i, j;
-  int binaryLength, asciiLength, bitsPerChar, offset, charNum, digit;
+char binaryStringToASCII(const unsigned char* binaryString) {
+  // this method uses the first 8 elements of binaryString and converts them to a char
+  int j, digit, bitsPerChar = 8;
+  char charNum = 0;
 
-  bitsPerChar = sizeof(char) * 8;
-
-  binaryLength = strlen(binaryString);
-  // check whether the binary string has reasonable amount of bits
-  if (binaryLength % bitsPerChar != 0) {
-    PRINTF("Binary string does not have a valid length\n");
-    return NULL;
+  for (j = 0; j < bitsPerChar; j++) {
+    charNum += binaryString[j] << (bitsPerChar - j - 1);
   }
 
-  asciiLength = binaryLength / bitsPerChar;
-
-  // allocate memory for the result: #asciiLength chars + null-byte
-  char* asciiString = (char*)malloc(sizeof(char) * (asciiLength + 1));
-
-  for (i = 0; i < asciiLength; i++) {
-    charNum = 0;
-    offset = i * bitsPerChar;
-    // loop over bits that form a char
-    for (j = 0; j < bitsPerChar; j++) {
-      // this converts char '0' or '1' to an int (0 or 1)
-      digit = binaryString[j + offset] - '0';
-      // shift the bit to its appropriate position and add to previous result
-      charNum += digit << (bitsPerChar - j - 1);
-    };
-
-    asciiString[i] = charNum;
-  }
-  // finish the string
-  asciiString[asciiLength] = '\0';
-
-  return asciiString;
+  return charNum;
 }
 
 /*---------------------------------------------------------------------------*/

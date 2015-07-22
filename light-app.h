@@ -43,13 +43,10 @@ PROCESS_NAME(light_app_process);
 void activateLED(unsigned char);
 
 /*
- * Converts a string consisting of "0"s and "1"s to an ascii string.
- * The length of the binary string must be a multiple of sizeof(char) * 8,
- * else NULL is returned.
- * i.e. "010000010100001001000011" -> ABC
- * REMEMBER TO FREE THE RETURNED BUFFER AT SOME POINT!!
+ * Converts a string consisting of "0"s and "1"s to an ascii char.
+ * i.e. "01000011" -> 'C'
  */
-char* binaryStringToASCII(const char*);
+char binaryStringToASCII(const unsigned char*);
 
 /*
  * Gathers values from the light sensor and computes their mean value which
@@ -61,7 +58,7 @@ void calibrate(int);
  * Returns the binary value for a value from the light sensor according to the
  * threshold that was computed during the calibration.
  */
-int getBinaryValue(int);
+unsigned char getBinaryValue(int);
 
 /*
  * Detects the first bit switch and computes the time difference to the next

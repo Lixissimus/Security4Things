@@ -30,31 +30,60 @@
  *
  */
 
-#ifndef K_MEANS_
-#define K_MEANS_
+#include "hamming.h"
+#include <stdio.h>
+#define ROWS 4
+#define COLS 8
 
-typedef struct {
-	int *elements;
-	int nrElements;
-} Cluster;
+int detectAndCorrectError(unsigned char* codeword) {
+ 	// Return 0 if there was no error or if it was corrected, non-zero otherwise.
+ 	// Changes codeword array!
+ 	// Codeword should have structure: P0 P1 D0 P2 D1 D2 D3 P3
+ 	int i, j;
+ 	char error, parity;
+ 	char prod[ROWS];
+	const char controlMatrix[ROWS][COLS] = {
+		{1, 0, 1, 0, 1, 0, 1, 0},
+		{0, 1, 1, 0, 0, 1, 1, 0},
+		{0, 0, 0, 1, 1, 1, 1, 0},
+		{1, 1, 1, 1, 1, 1, 1, 1}
+	};
 
-typedef struct {
-	int *centers;
-	int k;
-} KMeans;
+	for (i = 0; i < ROWS; i++) {
+		prod[i] = 0;
+		for (j = 0; j < COLS; j++) {
+			prod[i] += controlMatrix[i][j] * codeword[j];
+		}
+		prod[i] = prod[i] % 2;
+	}
 
-/*
- * Expects an int array of data values, the number of data values, 
- * the number of clusters to generate
- * and a pointer to a KMeans structure to store the result.
- */
-void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans);
+	// convert prod-vector into int
+	error = prod[2]*4 + prod[1]*2 + prod[0];
+	// separate parity bit
+	parity = prod[3];
 
-/*
- * Given a value and a pointer to a KMeans structure, it returns
- * the best class for the value. The KMeans structure should be 
- * created using buildClusters
- */
-unsigned char classify(int value, KMeans *p_kmeans);
+	if (error == 0 && parity == 0) {
+		// everything was transmitted correctly, or no error can be detected
+		return NO_BIT_ERROR;
+	} else if (error != 0 && parity == 1) {
+		// error can be corrected by negation 
+		codeword[error-1] = codeword[error-1] ^ 1;
+		return ONE_BIT_ERROR;
+	} else if (error == 0 && parity == 1) {
+		// error in parity bit of codeword
+		codeword[7] = codeword[7] ^ 1;
+		return ONE_BIT_ERROR;
+	} else {
+		// (error !=0 && parity == 0)
+		// 2 bit error, cannot be corrected
+		return TWO_BIT_ERROR;
+	}
+}
 
-#endif /* K_MEANS_ */
+void decode(unsigned char* hammingCode, unsigned char* output) {
+	// Codeword should have structure: P0 P1 D0 P2 D1 D2 D3 P3
+	output[0] = hammingCode[2];
+	output[1] = hammingCode[4];
+	output[2] = hammingCode[5];
+	output[3] = hammingCode[6];
+}
