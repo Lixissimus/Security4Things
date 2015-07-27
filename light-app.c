@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "light-app.h"
+#include "crc32.h"
 #include "sys/etimer.h"
 #include "dev/light-sensor.h"
 #include "k-means.h"
@@ -57,7 +58,21 @@
 #define LEDS_RED      4
 #define LEDS_ALL      7
 
-enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ, VERIFY, EXIT };
+#define READ_X_BYTES(x, id, newPhase, printChars) \
+if (initializedBuffer##id == 0) { \
+  readBuffer = malloc(sizeof(char) * x); \
+  readBufferBytesRead = 0; \
+  initializedBuffer##id = 1; \
+} \
+readBufferBytesRead += read(value, readBuffer, readBufferBytesRead, printChars); \
+if (readBufferBytesRead >= x) { \
+  phase = newPhase; \
+  buffer = (unsigned char*) myRealloc((void *) buffer, bufferSize, bufferSize + x); \
+  memcpy(&buffer[bufferSize], readBuffer, x); \
+  bufferSize += x; \
+}
+
+enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ_LENGTH, READ_DATA, READ_CRC, VERIFY, EXIT };
 
 PROCESS(light_app_process, "light app process");
 AUTOSTART_PROCESSES(&light_app_process);
@@ -91,8 +106,18 @@ void activateLED(unsigned char ledv) {
   leds_on(ledv);
 }
 
-int round(float num) {
+int myRound(float num) {
   return (int) (num + 0.5);
+}
+
+int myMin(int a, int b) {
+    return a<b ? a : b;
+}
+
+void *myRealloc(void * buffer, unsigned long bufferSize, size_t size) {
+  void * newBuffer = malloc(size);
+  memcpy(newBuffer, buffer, myMin(size, bufferSize));
+  return newBuffer;
 }
 
 void calibrate(int newValue) {
@@ -128,7 +153,7 @@ void synchronize(int value) {
       periodsMeasured += 1;
       if (periodsMeasured == 20) {
         periodLength = clock_time() - syncStartTime;
-        periodLength = round((float) periodLength / 20);
+        periodLength = myRound((float) periodLength / 20);
 
         PRINTF("Synchronization finished, periodLength is %d clock ticks, which is %lums\n\n", (int) periodLength,
           ((long) periodLength) * 1000 / CLOCK_SECOND);
@@ -156,17 +181,18 @@ void init(int value) {
     // and set bitsToRead accordingly
     PRINTF("\nInitialization finished\n\n");
     activateLED(LEDS_BLUE);
-    phase = READ;
+    phase = READ_LENGTH;
   }
 }
 
-void read(int value) {
-  int i, hammingError1, hammingError2;
+int read(int value, unsigned char* readBuffer, unsigned int readBufferBytesRead, unsigned int printChars) {
+  int hammingError1, hammingError2;
   unsigned char charBits[8];
-  char readChar;
+  unsigned char readChar;
   unsigned char bitValue = getBinaryValue(value);
 
   dataBuffer[bitsRead] = bitValue;
+  bitsRead++;
   if (useHamming && bitsRead == 16) {
     // detectAndCorrectError just uses the first 8 elements of the given array
     hammingError1 = detectAndCorrectError(dataBuffer);
@@ -176,6 +202,7 @@ void read(int value) {
     if (hammingError1 == TWO_BIT_ERROR || hammingError2 == TWO_BIT_ERROR) {
       // error cannot be corrected
       PRINTF("\nError while transmission, detected by hamming code\n");
+      activateLED(LEDS_RED);
       phase = EXIT;
     } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
       // error was corrected
@@ -186,29 +213,25 @@ void read(int value) {
     decode(&dataBuffer[8], &charBits[4]);
     readChar = binaryStringToASCII(charBits);
 
-    if (readChar == 0) {
-      phase = VERIFY;
-    } else {
-      PRINTF("%c", readChar);
-      bitsRead = 0;
-    }
+    if (printChars == 1) { PRINTF("%c", readChar); }
+    readBuffer[readBufferBytesRead] = readChar;
+    bitsRead = 0;
+    return 1;
   } else if (!useHamming && bitsRead == 8) {
     readChar = binaryStringToASCII(dataBuffer);
-    if (readChar == 0) {
-      phase = VERIFY;
-    } else {
-      PRINTF("%c", readChar);
-      bitsRead = 0;
-    }
+    if (printChars == 1) { PRINTF("%c", readChar); }
+    readBuffer[readBufferBytesRead] = readChar;
+    bitsRead = 0;
+    return 1;
   }
 
-  bitsRead++;
+  return 0;
 }
 
-char binaryStringToASCII(const unsigned char* binaryString) {
+unsigned char binaryStringToASCII(const unsigned char* binaryString) {
   // this method uses the first 8 elements of binaryString and converts them to a char
-  int j, digit, bitsPerChar = 8;
-  char charNum = 0;
+  int j, bitsPerChar = 8;
+  unsigned char charNum = 0;
 
   for (j = 0; j < bitsPerChar; j++) {
     charNum += binaryString[j] << (bitsPerChar - j - 1);
@@ -217,11 +240,34 @@ char binaryStringToASCII(const unsigned char* binaryString) {
   return charNum;
 }
 
+int verify(unsigned char* buffer, unsigned long bufferSize, unsigned long dataLength) {
+  unsigned long crcSumApp, crcSumMote;
+  unsigned char* data = malloc(dataLength);
+
+  // Copy data and crcSumApp from overall buffer into seperate ones
+  memcpy(data, &buffer[4], dataLength);
+  memcpy(&crcSumApp, &buffer[bufferSize - 4], 4);
+
+  crcSumMote = crc32(data, dataLength);
+
+  PRINTF("\nChecksum mote: %lu ", crcSumMote);
+  PRINTF("\nChecksum app: %lu ", crcSumApp);
+  return crcSumMote == crcSumApp;
+}
+
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(light_app_process, ev, data)
 {
   static struct etimer et;
   static int i;
+
+  static unsigned char* buffer;
+  static size_t bufferSize = 0;
+
+  static char initializedBufferLength = 0, initializedBufferData = 0, initializedBufferCrc = 0;
+  static unsigned long dataLength;
+  static unsigned char* readBuffer;
+  static unsigned int readBufferBytesRead;
 
   PROCESS_BEGIN();
 
@@ -261,17 +307,34 @@ PROCESS_THREAD(light_app_process, ev, data)
       waitTime = periodLength;
       etimer_set(&et, waitTime);
       init(value);
-    } else if (phase == READ) {
+    } else if (phase == READ_LENGTH) {
       waitTime = periodLength;
       etimer_set(&et, waitTime);
-      read(value);
+      READ_X_BYTES(4, Length, READ_DATA, 0);
+    } else if (phase == READ_DATA) {
+      if (initializedBufferData == 0) {
+        memcpy(&dataLength, buffer, 4);
+        PRINTF("Data length: %lu \n", dataLength);
+      }
+      waitTime = periodLength;
+      etimer_set(&et, waitTime);
+      READ_X_BYTES(dataLength, Data, READ_CRC, 1);
+    } else if (phase == READ_CRC) {
+      waitTime = periodLength;
+      etimer_set(&et, waitTime);
+      READ_X_BYTES(4, Crc, VERIFY, 0);
     } else if (phase == VERIFY) {
       // wait x seconds before terminating
       waitTime = 10 * CLOCK_SECOND;
       etimer_set(&et, waitTime);
-      // call to verification function
+
+      int dataCorrect = verify(buffer, bufferSize, dataLength);
       // activate LEDS_GREEN or LEDS_RED based on return value
-      activateLED(LEDS_GREEN);
+      if (dataCorrect) {
+        activateLED(LEDS_GREEN);
+      } else {
+        activateLED(LEDS_RED);
+      }
       phase = EXIT;
     }
 

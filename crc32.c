@@ -30,56 +30,39 @@
  *
  */
 
-#ifndef LIGHT_APP_H_
-#define LIGHT_APP_H_
+#include "crc32.h"
+  
+// Reverses (reflects) bits in a 32-bit word.
+unsigned long reverse(unsigned long x) {
+   x = ((x & 0x55555555) <<  1) | ((x >>  1) & 0x55555555);
+   x = ((x & 0x33333333) <<  2) | ((x >>  2) & 0x33333333);
+   x = ((x & 0x0F0F0F0F) <<  4) | ((x >>  4) & 0x0F0F0F0F);
+   x = (x << 24) | ((x & 0xFF00) << 8) |
+       ((x >> 8) & 0xFF00) | (x >> 24);
+   return x;
+}
+  
+/* This is the basic CRC algorithm with no optimizations. It follows the
+logic circuit as closely as possible. */
+ 
+unsigned long crc32(unsigned char* message, unsigned long length) {
+   int i, j;
+   unsigned long byte, crc;
 
-#include "contiki.h"
-
-PROCESS_NAME(light_app_process);
-
-/*
- * Deactivates all other LEDs and activates the ones in the parameter.
- */
-void activateLED(unsigned char);
-
-/*
- * Converts a string consisting of "0"s and "1"s to an ascii char.
- * i.e. "01000011" -> 'C'
- */
-unsigned char binaryStringToASCII(const unsigned char*);
-
-/*
- * Gathers values from the light sensor and computes their mean value which
- * is then used as a threshold to distinguish between 0 and 1 bits.
- */
-void calibrate(int);
-
-/*
- * Returns the binary value for a value from the light sensor according to the
- * threshold that was computed during the calibration.
- */
-unsigned char getBinaryValue(int);
-
-/*
- * Detects the first bit switch and computes the time difference to the next
- * bit switch, which is the time each bit is transmitted for. Saves the
- * time of a bit switch in syncStartTime and the transmission time in periodLength.
- */
-void synchronize(int);
-
-/*
- * Detects the init pattern, to know when the data is being sent.
- */
-void init(int);
-
-/*
- * Does stuff with the data.
- */
-int read(int, unsigned char*, unsigned int, unsigned int);
-
-/*
- * Computes the crc32 checksum of the data and compares it to the one sent by the client.
- */
-int verify(unsigned char*, unsigned long, unsigned long);
-
-#endif /* LIGHT_APP_H_ */
+   i = 0;
+   crc = 0xFFFFFFFF;
+   while (i < length) {
+      byte = message[i];            // Get next byte.
+      byte = reverse(byte);         // 32-bit reversal.
+      for (j = 0; j <= 7; j++) {    // Do eight times.
+         if ((long)(crc ^ byte) < 0) {
+            crc = (crc << 1) ^ 0x04C11DB7;
+         } else {
+            crc = crc << 1;
+         }
+         byte = byte << 1;          // Ready next msg bit.
+      }
+      i = i + 1;
+   }
+   return reverse(~crc);
+}

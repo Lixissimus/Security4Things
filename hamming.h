@@ -35,8 +35,8 @@
 
 enum result {NO_BIT_ERROR, ONE_BIT_ERROR, TWO_BIT_ERROR};
 
-int detectAndCorrectError(unsigned char* codeword);
+int detectAndCorrectError(unsigned char*);
 
-void decode(unsigned char* hammingCode, unsigned char* output);
+void decode(unsigned char*, unsigned char*);
 
 #endif /* HAMMING_ */
