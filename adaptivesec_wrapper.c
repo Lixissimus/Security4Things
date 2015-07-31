@@ -31,6 +31,7 @@
  */
 
 #include <stdio.h>
+#include "adaptivesec_wrapper.h"
 #include "net/llsec/adaptivesec/adaptivesec.h"
 
 
