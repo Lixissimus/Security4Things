@@ -40,7 +40,8 @@
 
 #include "contiki.h"
 
-PROCESS_NAME(light_app_process);
+// PROCESS_NAME(light_app_process);
+PROCESS(light_app_process, "light app process");
 
 /*
  * Deactivates all other LEDs and activates the ones in the parameter.
@@ -75,7 +76,7 @@ void synchronize(int);
 /*
  * Detects the init pattern, to know when the data is being sent.
  */
-void init(int);
+void initialize(int);
 
 /*
  * Does stuff with the data.

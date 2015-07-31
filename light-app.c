@@ -167,7 +167,7 @@ void synchronize(int value) {
   lastSyncValue = syncValue;
 }
 
-void init(int value) {
+void initialize(int value) {
   unsigned char initValue = getBinaryValue(value);
 
   last8bits = last8bits << 1;
@@ -306,7 +306,7 @@ PROCESS_THREAD(light_app_process, ev, data)
     } else if (phase == INIT) {
       waitTime = periodLength;
       etimer_set(&et, waitTime);
-      init(value);
+      initialize(value);
     } else if (phase == READ_LENGTH) {
       waitTime = periodLength;
       etimer_set(&et, waitTime);
