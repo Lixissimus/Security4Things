@@ -34,21 +34,60 @@
 #include "adaptivesec_wrapper.h"
 #include "net/llsec/adaptivesec/adaptivesec.h"
 
+static int initializedKey = 0;
+static int keyInitializationTriggered = 0;
+
+/*
+ * Checks whether key is initialized and triggers key initialization if necessary.
+ * Returns 1 if key is initialized and 0 otherwise.
+ */
+static int keyInitialization() {
+
+  // Check whether key was already initialized
+  if (initializedKey == 1) {
+    return 1;
+  }
+
+  // Check whether key initialization was already triggered
+  if (keyInitializationTriggered == 0) {
+    printf("[Adaptivesec_Driver_Wrapper] Trigger key initialization.");
+    // Trigger light app
+    keyInitializationTriggered = 1;
+    return 0;
+  }
+
+  // Check whether key was initialized
+  uint8_t initialized = 0;
+  key_flash_restore_keying_material(&initialized, 1, AES_128_KEY_LENGTH)
+  if (initialized == 1) {
+    printf("[Adaptivesec_Driver_Wrapper] Key is initialized.");
+    initializedKey = 1;
+    return 1;
+  }
+
+  // Key initialization was already triggered but key is not initialized yet
+  return 0;
+}
 
 static void init(void)
 {
-	printf("EXTEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEERN#########################!");
-  adaptivesec_driver.init();
+  if (keyInitialization() == 1) {
+    adaptivesec_driver.init();
+  }
 }
 
 static void send(mac_callback_t sent, void *ptr)
 {
-	adaptivesec_driver.send(sent, ptr);
+  if (keyInitialization() == 1) {
+    adaptivesec_driver.send(sent, ptr);
+  }
 }
 
 static void input(void)
 {
-  adaptivesec_driver.input();
+  if (keyInitialization() == 1) {
+    adaptivesec_driver.input();
+  }
 }
 
 
