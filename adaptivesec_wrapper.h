@@ -30,61 +30,11 @@
  *
  */
 
-#ifndef LIGHT_APP_H_
-#define LIGHT_APP_H_
+#ifndef ADAPTIVESEC_WRAPPER_H_
+#define ADAPTIVESEC_WRAPPER_H_
 
-#ifdef NETSTACK_CONF_LLSEC
-#undef NETSTACK_CONF_LLSEC
-#endif /* NETSTACK_CONF_LLSEC */
-#define NETSTACK_CONF_LLSEC adaptivesec_driver_wrapper
+#include "net/llsec/llsec.h"
 
-#include "contiki.h"
+extern const struct llsec_driver adaptivesec_driver_wrapper;
 
-PROCESS_NAME(light_app_process);
-
-/*
- * Deactivates all other LEDs and activates the ones in the parameter.
- */
-void activateLED(unsigned char);
-
-/*
- * Converts a string consisting of "0"s and "1"s to an ascii char.
- * i.e. "01000011" -> 'C'
- */
-unsigned char binaryStringToASCII(const unsigned char*);
-
-/*
- * Gathers values from the light sensor and computes their mean value which
- * is then used as a threshold to distinguish between 0 and 1 bits.
- */
-void calibrate(int);
-
-/*
- * Returns the binary value for a value from the light sensor according to the
- * threshold that was computed during the calibration.
- */
-unsigned char getBinaryValue(int);
-
-/*
- * Detects the first bit switch and computes the time difference to the next
- * bit switch, which is the time each bit is transmitted for. Saves the
- * time of a bit switch in syncStartTime and the transmission time in periodLength.
- */
-void synchronize(int);
-
-/*
- * Detects the init pattern, to know when the data is being sent.
- */
-void init(int);
-
-/*
- * Does stuff with the data.
- */
-int read(int, unsigned char*, unsigned int, unsigned int);
-
-/*
- * Computes the crc32 checksum of the data and compares it to the one sent by the client.
- */
-int verify(unsigned char*, unsigned long, unsigned long);
-
-#endif /* LIGHT_APP_H_ */
+#endif /* ADAPTIVESEC_WRAPPER_H_ */
