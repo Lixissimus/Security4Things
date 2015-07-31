@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include "adaptivesec_wrapper.h"
 #include "net/llsec/adaptivesec/adaptivesec.h"
+#include "sys/key-flash.h"
 
 static int initializedKey = 0;
 static int keyInitializationTriggered = 0;
@@ -50,7 +51,7 @@ static int keyInitialization() {
 
   // Check whether key initialization was already triggered
   if (keyInitializationTriggered == 0) {
-    printf("[Adaptivesec_Driver_Wrapper] Trigger key initialization.");
+    printf("[Adaptivesec_Driver_Wrapper] Trigger key initialization.\n");
     // Trigger light app
     keyInitializationTriggered = 1;
     return 0;
@@ -58,9 +59,9 @@ static int keyInitialization() {
 
   // Check whether key was initialized
   uint8_t initialized = 0;
-  key_flash_restore_keying_material(&initialized, 1, AES_128_KEY_LENGTH)
+  key_flash_restore_keying_material(&initialized, 1, AES_128_KEY_LENGTH);
   if (initialized == 1) {
-    printf("[Adaptivesec_Driver_Wrapper] Key is initialized.");
+    printf("[Adaptivesec_Driver_Wrapper] Key is initialized.\n");
     initializedKey = 1;
     return 1;
   }
