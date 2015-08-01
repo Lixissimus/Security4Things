@@ -40,8 +40,7 @@
 
 #include "contiki.h"
 
-// PROCESS_NAME(light_app_process);
-PROCESS(light_app_process, "light app process");
+PROCESS_NAME(light_app_process);
 
 /*
  * Deactivates all other LEDs and activates the ones in the parameter.
