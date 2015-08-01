@@ -74,8 +74,8 @@ if (readBufferBytesRead >= x) { \
 
 enum Phase { CALIBRATE, SYNCHRONIZE, INIT, READ_LENGTH, READ_DATA, READ_CRC, VERIFY, EXIT };
 
-PROCESS(light_app_process, "light app process");
-AUTOSTART_PROCESSES(&light_app_process);
+// PROCESS(light_app_process, "light app process");
+// AUTOSTART_PROCESSES(&light_app_process);
 
 // CALIBRATE
 int window[KMEANS_VALUES];
@@ -256,8 +256,8 @@ int verify(unsigned char* buffer, unsigned long bufferSize, unsigned long dataLe
 }
 
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(light_app_process, ev, data)
-{
+// PROCESS_THREAD(light_app_process, ev, data)
+void doYourThing() {
   static struct etimer et;
   static int i;
 
@@ -269,7 +269,7 @@ PROCESS_THREAD(light_app_process, ev, data)
   static unsigned char* readBuffer;
   static unsigned int readBufferBytesRead;
 
-  PROCESS_BEGIN();
+  // PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(light_sensor);
 
@@ -349,6 +349,6 @@ PROCESS_THREAD(light_app_process, ev, data)
   // this memory was allocated in buildClusters and needs to be freed
   free(kmeans.centers);
   
-  PROCESS_END();
+  // PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

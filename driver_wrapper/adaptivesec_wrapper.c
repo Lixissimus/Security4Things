@@ -39,6 +39,17 @@
 static int initializedKey = 0;
 static int keyInitializationTriggered = 0;
 
+PROCESS(light_app, "Light app process");
+
+PROCESS_THREAD(light_app, ev, data)
+{
+  PROCESS_BEGIN();
+
+  doYourThing();
+
+  PROCESS_END();
+}
+
 /*
  * Checks whether key is initialized and triggers key initialization if necessary.
  * Returns 1 if key is initialized and 0 otherwise.
@@ -53,7 +64,10 @@ static int keyInitialization() {
   if (keyInitializationTriggered == 0) {
     printf("[Adaptivesec_Driver_Wrapper] Trigger key initialization.\n");
     // Trigger light app
-    process_start(&light_app_process, NULL);
+
+    // PROCESS_NAME(light_app_process);
+    // PROCESS(light_app_process, "light app process");
+    process_start(&light_app, NULL);
 
     keyInitializationTriggered = 1;
     return 0;

@@ -42,6 +42,7 @@
 
 PROCESS_NAME(light_app_process);
 
+
 /*
  * Deactivates all other LEDs and activates the ones in the parameter.
  */
@@ -86,5 +87,8 @@ int read(int, unsigned char*, unsigned int, unsigned int);
  * Computes the crc32 checksum of the data and compares it to the one sent by the client.
  */
 int verify(unsigned char*, unsigned long, unsigned long);
+
+void doYourThing();
+
 
 #endif /* LIGHT_APP_H_ */
