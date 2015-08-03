@@ -132,14 +132,8 @@ void buildClusters(const int *data, int nrData, int k, KMeans *p_kmeans) {
 	}
 
 	for (i = 0; i < k; i++) {
-		printf("mean: %d\n", p_kmeans->centers[i]);
-		printf("number of elements: %d: \n", clusters[i].nrElements);
-		for (j = 0; j < clusters[i].nrElements; j++) {
-			printf("%d ", clusters[i].elements[j]);
-		}
 		// free the previously allocated memory
 		free(clusters[i].elements);
-		printf("\n");
 	}
 
 	// sort the centers
