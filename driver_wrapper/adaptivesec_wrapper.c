@@ -47,11 +47,10 @@ static int keyInitializationTriggered = 0;
  * Returns 1 if key is initialized and 0 otherwise.
  */
 static int keyInitialization() {
-  #ifdef RESET_KEY
-  key_flash_erase_keying_material();
-  #endif
-
   if (checkedInitializedKey == 0) {
+    #ifdef RESET_KEY
+    key_flash_erase_keying_material();
+    #endif
     key_flash_restore_keying_material(&initializedKey, 1, AES_128_KEY_LENGTH);
     if (initializedKey != 1) initializedKey = 0;
     checkedInitializedKey = 1;
@@ -79,7 +78,7 @@ static int keyInitialization() {
     printf("[Adaptivesec_Driver_Wrapper] Key is initialized.\n");
     initializedKey = 1;
     // Causes a recursive call to keyInitialization, which is fine as initializedKey is now 1
-    //init();
+    init();
     return 1;
   }
 

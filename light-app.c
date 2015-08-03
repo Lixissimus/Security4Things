@@ -88,7 +88,7 @@ KMeans kmeans;
 // SYNCHRONIZE
 int periodsMeasured = 0;
 unsigned char lastSyncValue = 255;
-clock_time_t syncStartTime, periodLength;
+rtimer_clock_t syncStartTime, periodLength;
 
 // INIT
 unsigned char INIT_PATTERN = 'k'; // 01101011
@@ -102,7 +102,16 @@ unsigned char dataBuffer[16];
 unsigned char curChar = '\0';
 int bitsRead = 0;
 
+// LOOP
+struct rtimer rt;
+const struct sensors_sensor light_sensor;
 unsigned char* data;
+unsigned char* buffer;
+size_t bufferSize = 0;
+char initializedBufferLength = 0, initializedBufferData = 0, initializedBufferCrc = 0;
+unsigned long dataLength;
+unsigned char* readBuffer;
+unsigned int readBufferBytesRead;
 
 enum Phase phase = CALIBRATE;
 
@@ -129,7 +138,6 @@ void calibrate(int newValue) {
   int i;
 
   if (recorded < KMEANS_VALUES) {
-    PRINTF("%d ", newValue);
     window[recorded] = newValue;
     recorded++;
     return;
@@ -156,16 +164,16 @@ void synchronize(int value) {
   if (lastSyncValue != 255 && syncValue != lastSyncValue) {
     if (syncStartTime) {
       periodsMeasured += 1;
-      if (periodsMeasured == 20) {
-        periodLength = clock_time() - syncStartTime;
-        periodLength = myRound((float) periodLength / 20);
+      if (periodsMeasured == 10) {
+        periodLength = RTIMER_NOW() - syncStartTime;
+        periodLength = (unsigned int) (myRound((float) periodLength / 10 * (1000.0 / RTIMER_SECOND) / (1000.0 / CLOCK_SECOND)) * 256);
 
-        PRINTF("Synchronization finished, periodLength is %d clock ticks, which is %lums\n\n", (int) periodLength,
-          ((long) periodLength) * 1000 / CLOCK_SECOND);
+        PRINTF("Synchronization finished, periodLength is %u clock ticks, which is %lums\n\n", (unsigned int) periodLength,
+          ((long) periodLength) * 1000 / RTIMER_SECOND);
         phase = INIT;
       }
     } else {
-      syncStartTime = clock_time();
+      syncStartTime = RTIMER_NOW();
     }
   }
 
@@ -206,7 +214,7 @@ int read(int value, unsigned char* readBuffer, unsigned int readBufferBytesRead,
 
     if (hammingError1 == TWO_BIT_ERROR || hammingError2 == TWO_BIT_ERROR) {
       // error cannot be corrected
-      PRINTF("\nError while transmission, detected by hamming code\n");
+      PRINTF("\nHamming Error!\n");
       activateLED(LEDS_RED);
       phase = EXIT;
     } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
@@ -217,13 +225,11 @@ int read(int value, unsigned char* readBuffer, unsigned int readBufferBytesRead,
     decode(dataBuffer, charBits);
     decode(&dataBuffer[8], &charBits[4]);
     readChar = binaryStringToASCII(charBits);
-
-    if (printChars == 1) { PRINTF("%c", readChar); }
-    readBuffer[readBufferBytesRead] = readChar;
-    bitsRead = 0;
-    return 1;
   } else if (!useHamming && bitsRead == 8) {
     readChar = binaryStringToASCII(dataBuffer);
+  }
+
+  if ((useHamming && bitsRead == 16) || (!useHamming && bitsRead == 8)) {
     if (printChars == 1) { PRINTF("%c", readChar); }
     readBuffer[readBufferBytesRead] = readChar;
     bitsRead = 0;
@@ -256,8 +262,61 @@ int verify(unsigned char* buffer, unsigned long bufferSize, unsigned long dataLe
   crcSumMote = crc32(data, dataLength);
 
   PRINTF("\nChecksum mote: %lu ", crcSumMote);
-  PRINTF("\nChecksum app: %lu ", crcSumApp);
+  PRINTF("\nChecksum app: %lu \n", crcSumApp);
   return crcSumMote == crcSumApp;
+}
+
+void loop() {
+  int startTime = RTIMER_NOW();
+
+  int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
+
+  int waitTime = 0;
+  if (phase == CALIBRATE) {
+    waitTime = RTIMER_SECOND / CAPTURE_FREQUENCY;
+    calibrate(value);
+  } else if (phase == SYNCHRONIZE) {
+    waitTime = 10;
+    synchronize(value);
+    if (phase == INIT) {
+      waitTime = periodLength - 10;
+    }
+  } else if (phase == INIT) {
+    waitTime = periodLength;
+    initialize(value);
+  } else if (phase == READ_LENGTH) {
+    waitTime = periodLength;
+    READ_X_BYTES(4, Length, READ_DATA, 0);
+  } else if (phase == READ_DATA) {
+    if (initializedBufferData == 0) {
+      memcpy(&dataLength, buffer, 4);
+      PRINTF("Data length: %lu \n", dataLength);
+    }
+    waitTime = periodLength;
+    READ_X_BYTES(dataLength, Data, READ_CRC, 1);
+  } else if (phase == READ_CRC) {
+    waitTime = periodLength;
+    READ_X_BYTES(4, Crc, VERIFY, 0);
+  } else if (phase == VERIFY) {
+    // wait x seconds before terminating
+    waitTime = 10 * RTIMER_SECOND;
+
+    int dataCorrect = verify(buffer, bufferSize, dataLength);
+    // activate LEDS_GREEN or LEDS_RED based on return value
+    if (dataCorrect) {
+      activateLED(LEDS_GREEN);
+      key_flash_erase_keying_material();
+      key_flash_append_keying_material(data, AES_128_KEY_LENGTH);
+      uint8_t initialized = 1;
+      key_flash_append_keying_material(&initialized, 1);
+    } else {
+      activateLED(LEDS_RED);
+    }
+    phase = EXIT;
+    return;
+  }
+
+  rtimer_set(&rt, startTime + waitTime - 1, 1, (void (*)(void *))loop, NULL);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -266,19 +325,11 @@ PROCESS_THREAD(light_app_process, ev, data)
   static struct etimer et;
   static int i;
 
-  static unsigned char* buffer;
-  static size_t bufferSize = 0;
-
-  static char initializedBufferLength = 0, initializedBufferData = 0, initializedBufferCrc = 0;
-  static unsigned long dataLength;
-  static unsigned char* readBuffer;
-  static unsigned int readBufferBytesRead;
-
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(light_sensor);
 
-  PRINTF("Countdown for calibration...");
+  PRINTF("Calibration in...");
   i = 3;
   for (i = 3; i >= 0; i--) {
     etimer_set(&et, CLOCK_SECOND);
@@ -287,67 +338,12 @@ PROCESS_THREAD(light_app_process, ev, data)
     // Activate LEDs in the following order: Red, Blue, Green
     activateLED(1 << (i-1));
   }
-  PRINTF("go!\n\nCalibration values:\n");
+  PRINTF("go!\n\n");
+
+  loop();
 
   while(phase != EXIT) {
-
-    int value = light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR);
-
-    int waitTime = 0;
-    if (phase == CALIBRATE) {
-      waitTime = CLOCK_SECOND / CAPTURE_FREQUENCY;
-      etimer_set(&et, waitTime);
-      calibrate(value);
-    } else if (phase == SYNCHRONIZE) {
-      waitTime = 1;
-      etimer_set(&et, waitTime);
-      int startTime = clock_time();
-      synchronize(value);
-      if (phase == INIT) {
-        int execTime = clock_time() - startTime;
-        waitTime = periodLength - 2 - execTime;
-        etimer_set(&et, waitTime);
-      }
-    } else if (phase == INIT) {
-      waitTime = periodLength;
-      etimer_set(&et, waitTime);
-      initialize(value);
-    } else if (phase == READ_LENGTH) {
-      waitTime = periodLength;
-      etimer_set(&et, waitTime);
-      READ_X_BYTES(4, Length, READ_DATA, 0);
-    } else if (phase == READ_DATA) {
-      if (initializedBufferData == 0) {
-        memcpy(&dataLength, buffer, 4);
-        PRINTF("Data length: %lu \n", dataLength);
-      }
-      waitTime = periodLength;
-      etimer_set(&et, waitTime);
-      READ_X_BYTES(dataLength, Data, READ_CRC, 1);
-    } else if (phase == READ_CRC) {
-      waitTime = periodLength;
-      etimer_set(&et, waitTime);
-      READ_X_BYTES(4, Crc, VERIFY, 0);
-    } else if (phase == VERIFY) {
-      // wait x seconds before terminating
-      waitTime = 10 * CLOCK_SECOND;
-      etimer_set(&et, waitTime);
-
-      int dataCorrect = verify(buffer, bufferSize, dataLength);
-      // activate LEDS_GREEN or LEDS_RED based on return value
-      if (dataCorrect) {
-        activateLED(LEDS_GREEN);
-        key_flash_erase_keying_material();
-        key_flash_append_keying_material(data, AES_128_KEY_LENGTH);
-        uint8_t initialized = 1;
-        key_flash_append_keying_material(&initialized, 1);
-      } else {
-        activateLED(LEDS_RED);
-      }
-      phase = EXIT;
-    }
-
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    PROCESS_YIELD();
   }
 
   leds_off(LEDS_ALL);
