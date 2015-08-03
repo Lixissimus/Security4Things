@@ -47,11 +47,10 @@ static int keyInitializationTriggered = 0;
  * Returns 1 if key is initialized and 0 otherwise.
  */
 static int keyInitialization() {
-  #ifdef RESET_KEY
-  key_flash_erase_keying_material();
-  #endif
-
   if (checkedInitializedKey == 0) {
+    #ifdef RESET_KEY
+    key_flash_erase_keying_material();
+    #endif
     key_flash_restore_keying_material(&initializedKey, 1, AES_128_KEY_LENGTH);
     if (initializedKey != 1) initializedKey = 0;
     checkedInitializedKey = 1;
