@@ -37,4 +37,6 @@
 
 extern const struct llsec_driver adaptivesec_driver_wrapper;
 
+static void init();
+
 #endif /* ADAPTIVESEC_WRAPPER_H_ */
