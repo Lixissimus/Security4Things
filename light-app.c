@@ -36,6 +36,7 @@
 #include "crc32.h"
 #include "sys/etimer.h"
 #include "dev/light-sensor.h"
+#include "sys/key-flash.h"
 #include "k-means.h"
 #include "hamming.h"
 
@@ -57,6 +58,8 @@
 #define LEDS_BLUE     2
 #define LEDS_RED      4
 #define LEDS_ALL      7
+
+#define AES_128_KEY_LENGTH 16
 
 #define READ_X_BYTES(x, id, newPhase, printChars) \
 if (initializedBuffer##id == 0) { \
@@ -98,6 +101,8 @@ char useHamming = 0;
 unsigned char dataBuffer[16];
 unsigned char curChar = '\0';
 int bitsRead = 0;
+
+unsigned char* data;
 
 enum Phase phase = CALIBRATE;
 
@@ -242,7 +247,7 @@ unsigned char binaryStringToASCII(const unsigned char* binaryString) {
 
 int verify(unsigned char* buffer, unsigned long bufferSize, unsigned long dataLength) {
   unsigned long crcSumApp, crcSumMote;
-  unsigned char* data = malloc(dataLength);
+  data = malloc(dataLength);
 
   // Copy data and crcSumApp from overall buffer into seperate ones
   memcpy(data, &buffer[4], dataLength);
@@ -332,6 +337,10 @@ PROCESS_THREAD(light_app_process, ev, data)
       // activate LEDS_GREEN or LEDS_RED based on return value
       if (dataCorrect) {
         activateLED(LEDS_GREEN);
+        key_flash_erase_keying_material();
+        key_flash_append_keying_material(data, AES_128_KEY_LENGTH);
+        uint8_t initialized = 1;
+        key_flash_append_keying_material(&initialized, 1);
       } else {
         activateLED(LEDS_RED);
       }
@@ -339,9 +348,6 @@ PROCESS_THREAD(light_app_process, ev, data)
     }
 
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-
-    // PRINTF("light %d %d\n", light_sensor.value(LIGHT_SENSOR_PHOTOSYNTHETIC),
-        // light_sensor.value(LIGHT_SENSOR_TOTAL_SOLAR));
   }
 
   leds_off(LEDS_ALL);

@@ -65,6 +65,8 @@ static int keyInitialization() {
   if (initialized == 1) {
     printf("[Adaptivesec_Driver_Wrapper] Key is initialized.\n");
     initializedKey = 1;
+    // Causes a recursive call to keyInitialization, which is fine as initializedKey is now 1
+    init();
     return 1;
   }
 
