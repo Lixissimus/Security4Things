@@ -164,9 +164,9 @@ void synchronize(int value) {
   if (lastSyncValue != 255 && syncValue != lastSyncValue) {
     if (syncStartTime) {
       periodsMeasured += 1;
-      if (periodsMeasured == 10) {
+      if (periodsMeasured == 20) {
         periodLength = RTIMER_NOW() - syncStartTime;
-        periodLength = (unsigned int) (myRound((float) periodLength / 10 * (1000.0 / RTIMER_SECOND) / (1000.0 / CLOCK_SECOND)) * 256);
+        periodLength = (unsigned int) (myRound((float) periodLength / 20 * (1000.0 / RTIMER_SECOND) / (1000.0 / CLOCK_SECOND)) * 256);
 
         PRINTF("Synchronization finished, periodLength is %u clock ticks, which is %lums\n\n", (unsigned int) periodLength,
           ((long) periodLength) * 1000 / RTIMER_SECOND);
