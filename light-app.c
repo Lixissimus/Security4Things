@@ -279,7 +279,7 @@ void loop() {
     waitTime = 10;
     synchronize(value);
     if (phase == INIT) {
-      waitTime = periodLength - 10;
+      waitTime = periodLength - 100;
     }
   } else if (phase == INIT) {
     waitTime = periodLength;
