@@ -31,7 +31,7 @@
 \title{Project Light}
 
 \author{
-	Cornelius Bock, Daniel Werner, Felix Wolff
+	Cornelius Bock, Konrad-Felix Krentz, Daniel Werner, Felix Wolff
 }
 
 \terms{Internet of Things, Security}
@@ -55,17 +55,12 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \begin{itemize}
 	\item short introduction internet of things
 	\item some words about contiki
-	\item current security and key distribution situation
-	\item idea of transmitting keying material using light and phone app
+	\item current security and key distribution situation (akes)
+	\item idea of transmitting keying material using light and phone app, why light, alternative solutions
 	\item setup (android device/app, mote with light sensor)
 \end{itemize}
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
@@ -81,21 +76,19 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 	\end{itemize}
 \end{itemize}
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
 
 \section{Implementation}
 \label{sec:contiki_integration}
 
 \begin{itemize}
+	\item hamming code, crc32 checksum
 	\item Android app - functionality, flashlight, limitations
 	\item contiki process - functionality, rtimer?, kmeans?, limitations
 	\item driver wrapper to delay link layer initialization until key is initialized
 \end{itemize}
+
+
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
@@ -104,7 +97,10 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 	\item measure and evaluate maximum transmission speed, error rate
 	\item is hamming code necessary (worth the doubled length) or CRC alone sufficient
 	\item does the transmission rate have to be variable?
+	\item "keep the phone busy" (wake up more often to prevent cpu from sleeping)
 \end{itemize}
+
+
 
 \section{Future Work}
 \label{sec:future_work}
@@ -112,6 +108,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \begin{itemize}
 	\item bidirectional communication using the LEDs of the mote (and maybe camera)
 	\item 802.15.4 dongle to verify transmission (and do further initialization)
+	\item initialize several mote together, separate synchronization and data sending
 \end{itemize}
 
 % Bibliography
