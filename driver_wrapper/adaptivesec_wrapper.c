@@ -36,7 +36,7 @@
 #include "adaptivesec_wrapper.h"
 #include "net/llsec/adaptivesec/adaptivesec.h"
 
-#define RESET_KEY 1
+//#define RESET_KEY 1
 
 static int initializedKey = 0;
 static int checkedInitializedKey = 0;

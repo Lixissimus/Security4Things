@@ -276,7 +276,7 @@ void loop() {
     waitTime = RTIMER_SECOND / CAPTURE_FREQUENCY;
     calibrate(value);
   } else if (phase == SYNCHRONIZE) {
-    waitTime = 10;
+    waitTime = 20;
     synchronize(value);
     if (phase == INIT) {
       waitTime = periodLength - 100;
