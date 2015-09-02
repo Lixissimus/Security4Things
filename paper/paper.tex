@@ -66,26 +66,27 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \section{Introduction}
 \label{sec:introduction}
 
-\iffalse
-% this can be deleted later, just to have it in version control
-As computers have gotten smaller and less demanding, they were not just used directly anymore, but also embedded into a larger mechanical or technical system (SOURCE!): they enabled new kinds of gadgets or at least improved them dramatically.
-\textit{embedded systems} were born.they
-\fi
+The Internet of Things (IoT) is becoming more and more reality every day.
+It consists of small devices (called \textit{motes}), which are connected to the public Internet.
+They work together to allow us monitoring and controlling several kinds of real-world systems, % SOURCE!
+e.g. motes collecting information about parking lot occupancy allowing drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
 
-The Internet of Things (IoT)...
+In the last decades, the rise embedded systems changed our daily lives. % Source?
+However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
+Because of the huge variety if valuable possibilities, the impact of embedded systems will be advanced even further within the IoT.
 
-- Internet of things is coming
-- small connected devices (aka motes) work together to monitor and control from remote
-- unconnected embedded system had large impact on daily lives already
-- with networking, this impact will become greater
-- many possibilities, prospects of success
-- but: connected devices have much larger attack surface
-- so security becomes way more important
-- counter measures within network stack (akes) --> works great
-- but: needs to be configured, which hard with limited i/o capabilities
+However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than traditional embedded system had to face.
+New, adapted security measurements had to be developed and implemented to react to this.
+For example, Adaptive Key Establishment Scheme (AKES) provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices. % SOURCE!
+Nevertheless, one problem remains: IoT setups usually consist of plentiful nodes which all need to be initialized with keying material and parameters.
+This is a major problem, because typical motes lack of input/output devices which are securely usable without configured networking.
 
-- preloading in fabrics is kinda unsafe
-- plugging is sophisticated for normal setups, because many devices involved
+One possibility is to plug a wire to each and every node in order to initialize it.
+However, there are two downsides: first, a typical IoT setup consist of too many devices to be plugging a feasible solution. Second, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
+
+Another approach is to pre-initialize the keys in the factory.
+This would mean that either there is a small set of assigned keys, which would lead to vulnerabilities to brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes. However, they need to be as cheap as possible in order to be be affordable in great numbers.}.
+Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
 
 - this paper proposes a way to transmit initial keying material for sec layers from smart phone via light
 - should be an alternative for private users
