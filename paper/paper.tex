@@ -13,7 +13,7 @@
 \documentclass{sig-alternate} % v 2.5
 
 % --- Author Metadata here ---
-\conferenceinfo{Sample Conferenve}{'15 Potsdam, Germany}
+\conferenceinfo{Sample Conference}{'15 Potsdam, Germany}
 %\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
@@ -102,7 +102,7 @@ It periodically sends \textit{bright} and \textit{dark} values, each with a cert
 Simply said, it is blinking.
 
 The mote on the other side measures $n$ light values using its light sensor.
-The time between two measurements will probably not be equal to $T$, because the period length is unknown the mote at this point.
+The time between two measurements will probably not be equal to $T$, because the period length is unknown to the mote at this point.
 As long as \textit{bright} and \textit{dark} values are part of the $n$ measurements, the concrete time does not matter.
 After reading $n$ values, the mote calculates reasonable numeric values for \textit{bright} and \textit{dark}.
 For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm (add reference to implementation).
@@ -125,7 +125,7 @@ After recording $m$ bit flips, it can calculate the average period length.
 With completion of the first two phases, the mote is now able to read data sent by the phone.
 It learned a decision threshold for decoding the bits and the period length to read values at the right time.
 Figure~\ref{fig:read_a_bit} shows how data can be read. 
-However, the concrete implementation slightly differs from that figure, see (add reference to implementation).
+However, the actual implementation slightly differs from that figure, see (add reference to implementation).
 
 \begin{figure}
 	\centering
@@ -148,12 +148,34 @@ However, the concrete implementation slightly differs from that figure, see (add
 \section{Implementation}
 \label{sec:implementation}
 
-\begin{itemize}
-	\item hamming code, crc32 checksum, when to read a bit (at the end of the period)
-	\item Android app - functionality, flashlight, limitations
-	\item contiki process - functionality, rtimer?, kmeans?, limitations
-	\item driver wrapper to delay link layer initialization until key is initialized
-\end{itemize}
+Project Light consists of an Android app that creates and sends the key material and a Contiki process that runs on the sky mote and receives and validates it.
+Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
+
+All data that is being sent is encoded using a Hamming(8,4)-code so that two-bit errors can be detected and one-bit errors can be corrected.
+
+The CRC32 is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
+This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
+
+As the android timer that triggers the bit "emission" cannot be too early but in fact tends to be a little late (cite android real time paper), the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
+It is at the very end of a period to maximize error avoidance due to "timer-lateness".
+
+\subsection{Android app}
+\label{sub:android_app}
+
+functionality, flashlight, limitations
+
+\subsection{Mote}
+\label{sub:mote}
+
+\subsubsection{Contiki process}
+\label{ssub:contiki_process}
+
+functionality, rtimer?, kmeans?, limitations
+
+\subsubsection{Contiki driver wrapper}
+\label{ssub:contiki_driver_wrapper}
+
+driver wrapper to delay link layer initialization until key is initialized
 
 
 
