@@ -66,13 +66,53 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \section{Introduction}
 \label{sec:introduction}
 
-\begin{itemize}
-	\item short introduction internet of things
-	\item some words about contiki
-	\item current security and key distribution situation (akes)
-	\item idea of transmitting keying material using light and phone app, why light, alternative solutions
-	\item setup (android device/app, mote with light sensor)
-\end{itemize}
+\iffalse
+% this can be deleted later, just to have it in version control
+As computers have gotten smaller and less demanding, they were not just used directly anymore, but also embedded into a larger mechanical or technical system (SOURCE!): they enabled new kinds of gadgets or at least improved them dramatically.
+\textit{embedded systems} were born.they
+\fi
+
+The Internet of Things (IoT)...
+
+- Internet of things is coming
+- small connected devices (aka motes) work together to monitor and control from remote
+- unconnected embedded system had large impact on daily lives already
+- with networking, this impact will become greater
+- many possibilities, prospects of success
+- but: connected devices have much larger attack surface
+- so security becomes way more important
+- counter measures within network stack (akes) --> works great
+- but: needs to be configured, which hard with limited i/o capabilities
+
+- preloading in fabrics is kinda unsafe
+- plugging is sophisticated for normal setups, because many devices involved
+
+- this paper proposes a way to transmit initial keying material for sec layers from smart phone via light
+- should be an alternative for private users
+- basic setup:
+	- smart phone application allows to input keying material and parameters
+	- on first start, uninitialized mote load keying initialization program
+	- smart phone encodes keying material and transmits it as flickering light
+	- mote reads brightness values and reconstructs keying material
+	- if transmission was successful, keying material is permanently stored on mote
+	- on later start-ups, the mote don't reinitializes again, but uses stored keying material
+- why:
+	- light sensors are smaller than plugs
+	- physics of light is good understood by non-technical people
+	- multiple devices could be programmed concurrently
+
+- we implemented prototype using an android smart phone and a Contiki mote
+- Contiki is an open source operating system for IoT
+- we've implemented two versions of an application for the smart phone
+- we've tested various techniques to make transmission error-prone
+- we've tested, how fast we could get transmitting with high chance of correctness
+
+The rest of the paper is structured as follows:
+Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key initialization.
+In section~\ref{sec:communication_protocol}, we propose our protocol for the smart phone and the mote to communicate via light.
+Details of our implementations are presented in section~\ref{sec:implementation}, both for the emitting~(sec.~\ref{sub:android_app}) and the receiving~(sec.~\ref{sub:mote}) parts.
+In section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and it's limits.
+We conclude our work and give an outlook on what could be done next in section~\ref{sec:future_work}.
 
 
 \section{Related Work}
@@ -87,7 +127,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \section{Communication Protocol}
 \label{sec:communication_protocol}
 
-In the following section, we describe the phases of the protocol. 
+In the following section, we describe the phases of the protocol.
 Each phase contains the necessary steps for the Android device and the mote.
 Insights into the concrete implementation will be given in the Section~\ref{sec:implementation}.
 
@@ -97,7 +137,7 @@ Insights into the concrete implementation will be given in the Section~\ref{sec:
 The goal of the calibration phase is to establish light values for \textit{bright} and \textit{dark} on the mote.
 By doing this in the beginning of the protocol, we can adapt to different lighting situations in the room and different brightness levels of the phone.
 
-The task of the phone in this protocol stage is simple. 
+The task of the phone in this protocol stage is simple.
 It periodically sends \textit{bright} and \textit{dark} values, each with a certain period length $T$.
 Simply said, it is blinking.
 
@@ -124,7 +164,7 @@ After recording $m$ bit flips, it can calculate the average period length.
 
 With completion of the first two phases, the mote is now able to read data sent by the phone.
 It learned a decision threshold for decoding the bits and the period length to read values at the right time.
-Figure~\ref{fig:read_a_bit} shows how data can be read. 
+Figure~\ref{fig:read_a_bit} shows how data can be read.
 However, the actual implementation slightly differs from that figure, see Section~\ref{sec:implementation}.
 
 \begin{figure}
