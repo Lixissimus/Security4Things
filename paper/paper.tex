@@ -87,24 +87,69 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \section{Communication Protocol}
 \label{sec:communication_protocol}
 
-\begin{itemize}
-	\item phases of protocol
-	\begin{itemize}
-		\item calibration
-		\item synchronization
-		\item initialization
-		\item data sending
-		\item validation
-	\end{itemize}
-\end{itemize}
+In the following section, we describe the phases of the protocol. 
+Each phase contains the necessary steps for the Android device and the mote.
+Insights into the concrete implementation will be given in the Section~\ref{sec:implementation}.
+
+\subsection{Calibration}
+\label{sub:calibration}
+
+The goal of the calibration phase is to establish light values for \textit{bright} and \textit{dark} on the mote.
+By doing this in the beginning of the protocol, we can adapt to different lighting situations in the room and different brightness levels of the phone.
+
+The task of the phone in this protocol stage is simple. 
+It periodically sends \textit{bright} and \textit{dark} values, each with a certain period length $T$.
+Simply said, it is blinking.
+
+The mote on the other side measures $n$ light values using its light sensor.
+The time between two measurements will probably not be equal to $T$, because the period length is unknown the mote at this point.
+As long as \textit{bright} and \textit{dark} values are part of the $n$ measurements, the concrete time does not matter.
+After reading $n$ values, the mote calculates reasonable numeric values for \textit{bright} and \textit{dark}.
+For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm (add reference to implementation).
+After that, the mote is able to classify new light values.
+In other words, it can read bits.
+
+\subsection{Synchronization}
+\label{sub:synchronization}
+
+During synchronization, the mote learns the period length $T$.
+This is necessary to be able to read light values at the right time (see Figure~\ref{fig:read_a_bit}).
+
+In this phase, the phone just keeps sending \textit{bright} and \textit{dark} values with the period length $T$.
+This is the same as during calibration.
+
+The mote on the other hand now measures light values as fast as it can and classifies them as \textit{0} and \textit{1}.
+Once it notices that the bit flips, it records the time when the switch happened.
+After recording $m$ bit flips, it can calculate the average period length.
+
+With completion of the first two phases, the mote is now able to read data sent by the phone.
+It learned a decision threshold for decoding the bits and the period length to read values at the right time.
+Figure~\ref{fig:read_a_bit} shows how data can be read. 
+However, the concrete implementation slightly differs from that figure, see (add reference to implementation).
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=.5]{images/reading_data.png}
+	\caption{Reading data: The black horizontal lines show the brightness emitted by the phone, the red line is the decision threshold for classifying \textit{0} and \textit{1}. Each arrow shows a point in time where the mote reads the value of the light sensor. The result here is the bit string 0111.}
+	\label{fig:read_a_bit}
+\end{figure}
+
+\subsection{Initialization}
+\label{sub:initialization}
+
+\subsection{Data sending}
+\label{sub:data_sending}
+
+\subsection{Validation}
+\label{sub:validation}
 
 
 
 \section{Implementation}
-\label{sec:contiki_integration}
+\label{sec:implementation}
 
 \begin{itemize}
-	\item hamming code, crc32 checksum
+	\item hamming code, crc32 checksum, when to read a bit (at the end of the period)
 	\item Android app - functionality, flashlight, limitations
 	\item contiki process - functionality, rtimer?, kmeans?, limitations
 	\item driver wrapper to delay link layer initialization until key is initialized
