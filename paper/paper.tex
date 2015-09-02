@@ -88,25 +88,25 @@ Another approach is to pre-initialize the keys in the factory.
 This would mean that either there is a small set of assigned keys, which would lead to vulnerabilities to brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes. However, they need to be as cheap as possible in order to be be affordable in great numbers.}.
 Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
 
-- this paper proposes a way to transmit initial keying material for sec layers from smart phone via light
-- should be an alternative for private users
-- basic setup:
-	- smart phone application allows to input keying material and parameters
-	- on first start, uninitialized mote load keying initialization program
-	- smart phone encodes keying material and transmits it as flickering light
-	- mote reads brightness values and reconstructs keying material
-	- if transmission was successful, keying material is permanently stored on mote
-	- on later start-ups, the mote don't reinitializes again, but uses stored keying material
-- why:
-	- light sensors are smaller than plugs
-	- physics of light is good understood by non-technical people
-	- multiple devices could be programmed concurrently
+This paper proposes an alternative way to transmit initial keying material via light.
+It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
-- we implemented prototype using an android smart phone and a Contiki mote
-- Contiki is an open source operating system for IoT
-- we've implemented two versions of an application for the smart phone
-- we've tested various techniques to make transmission error-prone
-- we've tested, how fast we could get transmitting with high chance of correctness
+In a nutshell, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
+The mote receives the message via a light sensor and reconstructs the keys.
+After successful initialization and verification, the mote saves the keying material permanently.
+On subsequent reboots, it is read from memory and immediately usable without any further action required.
+
+There are several advantages of this method.
+Light sensors are smaller and less misusable than jacks.
+The physics of light is well understood by non-technical people, in contrast to radio waves.
+Thus, leaking of the wireless sent information is less likely.
+Moreover, multiple devices could be programmed concurrently by just placing them next to each other.
+
+We implemented prototype for an Android smart phone and a Contiki\footnote{http://www.contiki-os.org/} mote.
+Contiki is an open source, state-of-the-art operating system for IoT devices.
+For the Android phone, we implemented two versions of a light emitting application.
+We have tested some techniques to make the transmission error-prone.
+Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
 The rest of the paper is structured as follows:
 Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key initialization.
