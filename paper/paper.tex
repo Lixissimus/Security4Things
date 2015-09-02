@@ -105,7 +105,7 @@ The mote on the other side measures $n$ light values using its light sensor.
 The time between two measurements will probably not be equal to $T$, because the period length is unknown to the mote at this point.
 As long as \textit{bright} and \textit{dark} values are part of the $n$ measurements, the concrete time does not matter.
 After reading $n$ values, the mote calculates reasonable numeric values for \textit{bright} and \textit{dark}.
-For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm (add reference to implementation).
+For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm, see Section~\ref{ssub:contiki_process}.
 After that, the mote is able to classify new light values.
 In other words, it can read bits.
 
@@ -125,7 +125,7 @@ After recording $m$ bit flips, it can calculate the average period length.
 With completion of the first two phases, the mote is now able to read data sent by the phone.
 It learned a decision threshold for decoding the bits and the period length to read values at the right time.
 Figure~\ref{fig:read_a_bit} shows how data can be read. 
-However, the actual implementation slightly differs from that figure, see (add reference to implementation).
+However, the actual implementation slightly differs from that figure, see Section~\ref{sec:implementation}.
 
 \begin{figure}
 	\centering
@@ -148,7 +148,7 @@ However, the actual implementation slightly differs from that figure, see (add r
 \section{Implementation}
 \label{sec:implementation}
 
-Project Light consists of an Android app that creates and sends the key material and a Contiki process that runs on the sky mote and receives and validates it.
+Project Light consists of an Android app that creates and sends the key material and a Contiki process that runs on the TelosB sky mote and receives and validates it.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
 All data that is being sent is encoded using a Hamming(8,4)-code so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -170,14 +170,34 @@ functionality, flashlight, limitations
 \subsubsection{Contiki process}
 \label{ssub:contiki_process}
 
-functionality, rtimer?, kmeans?, limitations
+On the mote the communication protocol is implemented in a Contiki process.
+The Contiki operating system offers a real-time timer called \textit{rtimer} which eliminates timer inaccuracies on the mote side.
+The mote uses its light sensor to sense the current brightness.
+Once the process is started an LED-countdown (red -> blue -> green) indicates the start of the key initialization procedure.
+A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values.
+Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
+After the successful synchronization and initialization a blue LED indicates that the mote is receiving data.
+If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
+A green LED shows that the key material has successfully been received and was saved to the permanent flash? memory of the mote.
+
 
 \subsubsection{Contiki driver wrapper}
 \label{ssub:contiki_driver_wrapper}
 
-driver wrapper to delay link layer initialization until key is initialized
+----- Maybe part about akes and how this fits together?! -----
 
+For the mote to actually use the key material that was transmitted, the initialization of the link layer security needs to be delayed until that finished successfully.
+To do so we created a link layer driver wrapper that accomplishes the following things:
 
+\begin{itemize}
+	\item "Delay"/Cancel all calls to the link layer driver.
+	\item Check whether the key material was initialized before.
+	\item If not, start the light process and wait for successful initialization.
+	\item Forward all calls to the actual link layer driver.
+\end{itemize}
+
+As seen in (code example), calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization was finished.
+Including the light app on a mote automatically redefines \textit{$NETSTACK\_CONF\_LLSEC$} to point to our link layer driver wrapper (and no further configuration needs to be done?).
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
