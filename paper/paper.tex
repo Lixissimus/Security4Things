@@ -235,8 +235,8 @@ All data that is being sent is encoded using a Hamming(8,4)-code so that two-bit
 The CRC32 is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
 This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
 
-As the android timer that triggers the bit "emission" cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
-It is at the very end of a period to maximize error avoidance due to "timer-lateness".
+As the android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
+It is at the very end of a period to maximize error avoidance due to timer delays.
 
 \subsection{Android app}
 \label{sub:android_app}
@@ -269,7 +269,7 @@ For the mote to actually use the key material that was transmitted, the initiali
 To do so we created a link layer driver wrapper that accomplishes the following things:
 
 \begin{itemize}
-	\item "Delay"/Cancel all calls to the link layer driver.
+	\item Delay/Cancel all calls to the link layer driver.
 	\item Check whether the key material was initialized before.
 	\item If not, start the light process and wait for successful initialization.
 	\item Forward all calls to the actual link layer driver.
@@ -281,10 +281,14 @@ Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
 
+Having a configurable transmission rate was very helpful during development and testing.
+However it certainly introduces possible errors as the mote has to recognize the correct transmission rate, otherwise the initialization procedure will fail.
+We decided against fixating it, as during our experiments the mote in all cases determined the correct transmission rate.
+Also while testing different Android phones, we noticed each of it works best with a different transmission rate, so the app should change it depending on the phone model.
+
 \begin{itemize}
 	\item measure and evaluate maximum transmission speed, error rate
 	\item is hamming code necessary (worth the doubled length) or CRC alone sufficient
-	\item does the transmission rate have to be variable?
 	\item "keep the phone busy" (wake up more often to prevent cpu from sleeping)
 \end{itemize}
 
