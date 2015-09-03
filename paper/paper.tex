@@ -251,22 +251,30 @@ In the following sections, both the implementation of the Android application an
 \subsection{Android app}
 \label{sub:android_app}
 
-- two versions with different strengths
-- first web app deployed with cordova as native app
-- functionality: almost all parameters were adjustable, i.e. length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
-- biggest advantage: runs also in browser an easily portable to iPhone/windows phone/...
-- but also fast prototyping
-- downsides: javascript timer inaccuracy
-- Flash light reacted very slowly
-- white and dark screen background only possible way to go
+We have developed two different versions of an Android application for users to enter keys and transmit them.
 
--figure: both screenshots next to each other
+The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smart phone using Apache~Cordova\footnote{https://cordova.apache.org/}.
+Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone 8.1.
+In this version, almost all parameters for the transmission are adjustable by the user: length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
+Therefore it is convenient to experiment with various settings and transmission parameters and to test of the Contiki process.
+There are two disadvantages of this implementation, which motivated us to build a second edition:
+First, experiments using the flash light for light emission showed, that there are no predictable timing behavior, i.g. the flash light was simply to slow to allow short transmission times.
+This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
+Secondly, in order to get reliable transmission quality, we need to become as close to real-time as possible.
+This technology stack indicates bad real-time behavior, i.g. the Cordova runtime and the JavaScript interpreter could be omitted.
 
-- second version: native android app
-- still no real time possible (source!), but smaller stack (no phoneGap runtime and javascript interpreter required)
-- native readjusting timer: if one event fires too late, delay won't add up
-- flash light works as good as background flickering
-- clearer design because of less controllable parameters: just bit-length and switches to use flashlight and hamming-encoding. (better for end users)
+%figure: both screenshots next to each other
+
+Hence, we built a native Android application written in Java.
+Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
+The Java implementation also benefits from the ability of the native Java timer to readjust itself, i.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
+This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
+Another advantage of this version is is the flash light.
+Depending on the smart phone model, the flash light was as fast as screen flickering even for small bit lengths, while being much brighter.
+Especially when attempting to program multiple motes at once this comes very handy.
+To improve usability and discoverability, we dropped controls for some parameters, which led to a much leaner design as shown in figure~\ref{fig:screenshots}.
+
+However, as discussed in section~\ref{sec:results_and_discussion}, both versions worked well with similar values for the length of one bit.
 
 \subsection{Mote}
 \label{sub:mote}
