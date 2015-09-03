@@ -81,6 +81,14 @@ For example, Adaptive Key Establishment Scheme (AKES) provides adaptable securit
 Nevertheless, one problem remains: IoT setups usually consist of plentiful nodes which all need to be initialized with keying material and parameters.
 This is a major problem, because typical motes lack of input/output devices which are securely usable without configured networking.
 
+% figure is inserted here to be shown on page 1
+\begin{figure}
+	\centering
+	\includegraphics[scale=.4]{images/overview.png}
+	\caption{Transmission of keying material with light: \textbf{a)} enter and encode key and parameters on smart phone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist key and parameters, \textbf{d)} communicate securely via the public Internet }
+	\label{fig:overview}
+\end{figure}
+
 One possibility is to plug a wire to each and every node in order to initialize it.
 However, there are two downsides: first, a typical IoT setup consist of too many devices to be plugging a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
 
@@ -91,7 +99,7 @@ Anyway, pre-initialization requires somebody other than the user/installer to kn
 This paper proposes an alternative way to transmit initial keying material via light.
 It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
-In a nutshell, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
+As to be seen in fig.~\ref{fig:overview}, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
 The mote receives the message via a light sensor and reconstructs the keys.
 After successful initialization and verification, the mote saves the keying material permanently.
 On subsequent reboots, it is read from memory and immediately usable without any further action required.
@@ -190,7 +198,7 @@ It sends the pattern exactly once, then it proceeds to the next phase.
 
 After successful synchronization, the mote waits for the initialization pattern.
 It does that by reading single bits and comparing the last 8 bits (for ASCII encoding) to the pre-defined pattern.
-Once the init pattern has been detected, the mote imediately switches to the data sending phase. 
+Once the init pattern has been detected, the mote imediately switches to the data sending phase.
 
 \subsection{Data sending}
 \label{sub:data_sending}
@@ -221,7 +229,7 @@ In this last phase, the mote checks whether the transmission was successful.
 The phone does nothing in this phase, it has successfully run the protocol.
 The mote uses the received data workload and calculates the checksum by itself.
 If it is equal to the received one, the data packet is considered to be transmitted correctly.
-If both checksums differ, something must have gone wrong. 
+If both checksums differ, something must have gone wrong.
 It is not clear, whether the data workload was transmitted correctly and therefore the mote goes into an error state.
 
 \section{Implementation}
@@ -230,9 +238,9 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 Project Light consists of an Android app that creates and sends the key material and a Contiki process that runs on the TelosB sky mote and receives and validates it.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
-All data that is being sent is encoded using a Hamming(8,4)-code so that two-bit errors can be detected and one-bit errors can be corrected.
+All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
 
-The CRC32 is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
+The \textit{CRC32} is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
 This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
 
 As the android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
