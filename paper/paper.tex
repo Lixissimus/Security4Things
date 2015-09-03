@@ -246,10 +246,27 @@ This could be caused by 3-or-more-bit errors that the Hamming-code failed to det
 As the android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
 It is at the very end of a period to maximize error avoidance due to timer delays.
 
+In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
+
 \subsection{Android app}
 \label{sub:android_app}
 
-functionality, flashlight, limitations
+- two versions with different strengths
+- first web app deployed with cordova as native app
+- functionality: almost all parameters were adjustable, i.e. length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
+- biggest advantage: runs also in browser an easily portable to iPhone/windows phone/...
+- but also fast prototyping
+- downsides: javascript timer inaccuracy
+- Flash light reacted very slowly
+- white and dark screen background only possible way to go
+
+-figure: both screenshots next to each other
+
+- second version: native android app
+- still no real time possible (source!), but smaller stack (no phoneGap runtime and javascript interpreter required)
+- native readjusting timer: if one event fires too late, delay won't add up
+- flash light works as good as background flickering
+- clearer design because of less controllable parameters: just bit-length and switches to use flashlight and hamming-encoding. (better for end users)
 
 \subsection{Mote}
 \label{sub:mote}
