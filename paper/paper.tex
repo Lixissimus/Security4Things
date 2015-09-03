@@ -263,7 +263,12 @@ This forced us to use the screen for light emission, which resulted in far small
 Secondly, in order to get reliable transmission quality, we need to become as close to real-time as possible.
 This technology stack indicates bad real-time behavior, i.g. the Cordova runtime and the JavaScript interpreter could be omitted.
 
-%figure: both screenshots next to each other
+\begin{figure}
+	\centering
+	\includegraphics[scale=.35]{images/screenshots.png}
+	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
+	\label{fig:screenshots}
+\end{figure}
 
 Hence, we built a native Android application written in Java.
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
