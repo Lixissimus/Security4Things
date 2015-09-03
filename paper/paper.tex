@@ -178,13 +178,51 @@ However, the actual implementation slightly differs from that figure, see Sectio
 \subsection{Initialization}
 \label{sub:initialization}
 
+The target of the initialization phase is to tell the mote, when the actual data starts.
+The communication between the mote and the phone is one-way.
+That means, the mote cannot communicate with the Android app.
+Therefore, the app has to guess, when the mote has successfully done the calibration and synchronization.
+This can either be done by using a fixed time (let's say the app stays in calibration/synchronization phase for 10 seconds), or by user interaction (the user presses a button, when the mote indicates that it's ready).
+
+When the phone reaches the initialization phase as a result of one of those methods, it sends a pre-defined initialization pattern.
+The pattern must be different from 0101... and needs to have a length of one binary encoded character, e.g. 8 bit for ASCII encoding.
+It sends the pattern exactly once, then it proceeds to the next phase.
+
+After successful synchronization, the mote waits for the initialization pattern.
+It does that by reading single bits and comparing the last 8 bits (for ASCII encoding) to the pre-defined pattern.
+Once the init pattern has been detected, the mote imediately switches to the data sending phase. 
+
 \subsection{Data sending}
 \label{sub:data_sending}
+
+In the data sending phase, we can finally transmit the data packet.
+As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the transmission in the validation phase~\ref{sub:validation}.
+
+The Android app encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum using a pre-defined checksum algorithm.
+It is obvious, that those calculations can be done beforehand.
+The concatenated bit string then is sent using flashing of the display or the flash light.
+
+The mote, after having recognized the initialization pattern, reads blocks of bits.
+The first 4 byte are interpreted as the length of the actual data.
+Afterwards, it reads the appropriate number of blocks to receive the data workload.
+Once the whole data workload is read, it interprets the last 4 byte as the checksum.
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=.3]{images/data_packet.png}
+	\caption{Contents of the data packet: Besides the actual data, there is also the data length and a checksum transmitted.}
+	\label{fig:data_packet}
+\end{figure}
 
 \subsection{Validation}
 \label{sub:validation}
 
-
+In this last phase, the mote checks whether the transmission was successful.
+The phone does nothing in this phase, it has successfully run the protocol.
+The mote uses the received data workload and calculates the checksum by itself.
+If it is equal to the received one, the data packet is considered to be transmitted correctly.
+If both checksums differ, something must have gone wrong. 
+It is not clear, whether the data workload was transmitted correctly and therefore the mote goes into an error state.
 
 \section{Implementation}
 \label{sec:implementation}
@@ -238,7 +276,7 @@ To do so we created a link layer driver wrapper that accomplishes the following 
 \end{itemize}
 
 As seen in (code example), calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization was finished.
-Including the light app on a mote automatically redefines \textit{$NETSTACK\_CONF\_LLSEC$} to point to our link layer driver wrapper (and no further configuration needs to be done?).
+Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC} to point to our link layer driver wrapper (and no further configuration needs to be done?).
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
