@@ -71,7 +71,7 @@ It consists of small devices (called \textit{motes}), which are connected to the
 They work together, allowing monitoring and controlling of several kinds of real-world systems. % SOURCE!
 E.g., motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
 
-In the last decades, the rise embedded systems changed daily lives. % Source?
+In the last decades, the rise of embedded systems changed daily lives. % Source?
 However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
 Because of the huge variety of valuable possibilities, the impact of embedded systems will be advanced even further within the IoT.
 
@@ -93,10 +93,10 @@ One possibility is to plug a wire to each and every node in order to initialize 
 However, there are two downsides: first, a typical IoT setup consist of too many devices to be plugging a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
 
 Another approach is to pre-initialize the keys in the factory.
-This would mean that either there is a small set of assigned keys, which would lead to vulnerabilities to brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be be affordable in great numbers.}.
+This would mean that either there is a small set of assigned keys, which would lead to vulnerabilities to brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be affordable in great numbers.}.
 Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
 
-This paper proposes an alternative way to transmit initial keying material via light.
+This paper proposes an alternative way, which is transmitting initial keying material via light.
 It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
 As to be seen in fig.~\ref{fig:overview}, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
@@ -108,11 +108,10 @@ There are several advantages of this method.
 Light sensors are smaller and less misusable than jacks.
 The physics of light is well understood by non-technical people, in contrast to radio waves.
 Thus, leaking of the wireless sent secrets is less likely.
-Moreover, multiple devices could be programmed concurrently by just placing them next to each other.
+Moreover, multiple devices could be initialized concurrently by just placing them next to each other.
 
-We implemented prototype for an Android smart phone and a Contiki\footnote{http://www.contiki-os.org/} mote.
+We implemented a prototype for an Android smart phone and a mote running the Contiki OS\footnote{http://www.contiki-os.org/}.
 Contiki is an open source, state-of-the-art operating system for IoT devices.
-For Android phones, we implemented two versions of a light emitting application.
 We also tested some techniques to make the transmission error-prone.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
@@ -189,8 +188,8 @@ However, the actual implementation slightly differs from that figure, see Sectio
 The target of the initialization phase is to tell the mote, when the actual data starts.
 The communication between the mote and the phone is one-way.
 That means, the mote cannot communicate with the Android app.
-Therefore, the app has to guess, when the mote has successfully done the calibration and synchronization.
-This can either be done by using a fixed time (let's say the app stays in calibration/synchronization phase for 10 seconds), or by user interaction (the user presses a button, when the mote indicates that it's ready).
+Therefore, the app has to guess, when the mote has successfully done calibration and synchronization.
+This can either be done by using a fixed time (let's say the app stays in calibration and synchronization phase for 10 seconds), or by user interaction (the user presses a button, when the mote indicates that it's ready).
 
 When the phone reaches the initialization phase as a result of one of those methods, it sends a pre-defined initialization pattern.
 The pattern must be different from 0101... and needs to have a length of one binary encoded character, e.g. 8 bit for ASCII encoding.
@@ -198,13 +197,13 @@ It sends the pattern exactly once, then it proceeds to the next phase.
 
 After successful synchronization, the mote waits for the initialization pattern.
 It does that by reading single bits and comparing the last 8 bits (for ASCII encoding) to the pre-defined pattern.
-Once the init pattern has been detected, the mote imediately switches to the data sending phase.
+Once the init pattern has been detected, the mote immediately switches to the data sending phase.
 
 \subsection{Data sending}
 \label{sub:data_sending}
 
 In the data sending phase, we can finally transmit the data packet.
-As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the transmission in the validation phase~\ref{sub:validation}.
+As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase~\ref{sub:validation}.
 
 The Android app encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum using a pre-defined checksum algorithm.
 It is obvious, that those calculations can be done beforehand.
@@ -235,7 +234,7 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 \section{Implementation}
 \label{sec:implementation}
 
-Project Light consists of an Android app that creates and sends the key material and a Contiki process that runs on the TelosB sky mote and receives and validates it.
+Project Light consists of an Android app that creates and sends the keying material and a Contiki process that runs on the TelosB sky mote and receives and validates it.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
 All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -244,35 +243,43 @@ The \textit{CRC32} is chosen as the checksum algorithm for the validation phase 
 This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
 
 As the android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
-It is at the very end of a period to maximize error avoidance due to timer delays.
+It is at the very end of a period to maximize error avoidance due to timer delays\footnote{The Contiki timer that triggers the reading of the bit is a real-time timer.}.
 
 In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
 
 \subsection{Android app}
 \label{sub:android_app}
 
-We have developed two different versions of an Android application for users to enter keys and transmit them.
+We have developed two different versions of the Android application for users to enter keys and transmit them.
+
+% Ich wuerde den gesamten folgenden Abschnitt weglassen und gar nicht so richtig ueber die js timer Sachen reden. Vielleicht lieber noch einen kurzen Abschnitt generell ueber timing Sachen?
 
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smart phone using Apache~Cordova\footnote{https://cordova.apache.org/}.
 Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone 8.1.
 In this version, almost all parameters for the transmission are adjustable by the user: length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
 Therefore it is convenient to experiment with various settings and transmission parameters and to test of the Contiki process.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
-First, experiments using the flash light for light emission showed, that there are no predictable timing behavior, i.g. the flash light was simply to slow to allow short transmission times.
+First, experiments using the flash light for light emission showed, that there are no predictable timing behavior, e.g. the flash light was simply to slow to allow short transmission times.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
 Secondly, in order to get reliable transmission quality, we need to become as close to real-time as possible.
 This technology stack indicates bad real-time behavior, i.g. the Cordova runtime and the JavaScript interpreter could be omitted.
 
-\begin{figure}
-	\centering
-	\includegraphics[scale=.35]{images/screenshots.png}
-	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
-	\label{fig:screenshots}
-\end{figure}
+% bis hier hin weg
+
+% \begin{figure}
+% 	\centering
+% 	\includegraphics[scale=.35]{images/screenshots.png}
+% 	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
+% 	\label{fig:screenshots}
+% \end{figure}
+
+% Und den dann natuerlich noch anpassen
 
 Hence, we built a native Android application written in Java.
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
-The Java implementation also benefits from the ability of the native Java timer to readjust itself, i.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
+The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing errors do not add up.
+In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
+% , e.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
 This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
 Another advantage of this version is is the flash light.
 Depending on the smart phone model, the flash light was as fast as screen flickering even for small bit lengths, while being much brighter.
@@ -287,15 +294,15 @@ However, as discussed in section~\ref{sec:results_and_discussion}, both versions
 \subsubsection{Contiki process}
 \label{ssub:contiki_process}
 
-On the mote the communication protocol is implemented in a Contiki process.
+On the mote, the communication protocol is implemented in a Contiki process.
 The Contiki operating system offers a real-time timer called \textit{rtimer} which eliminates timer inaccuracies on the mote side.
 The mote uses its light sensor to sense the current brightness.
-Once the process is started an LED-countdown (red -> blue -> green) indicates the start of the key initialization procedure.
-A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values.
+Once the process is started, an LED-countdown (red -> blue -> green) indicates the start of the key initialization procedure.
+A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(\ref{sub:calibration}).
 Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
-After the successful synchronization and initialization a blue LED indicates that the mote is receiving data.
+After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
-A green LED shows that the key material has successfully been received and was saved to the permanent flash? memory of the mote.
+A green LED shows that the key material has successfully been received and was saved to the permanent flash memory of the mote.
 
 
 \subsubsection{Contiki driver wrapper}
@@ -313,7 +320,7 @@ To do so we created a link layer driver wrapper that accomplishes the following 
 	\item Forward all calls to the actual link layer driver.
 \end{itemize}
 
-As seen in (code example), calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization was finished.
+As seen in (code example), calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization has finished.
 Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper (and no further configuration needs to be done?).
 
 \section{Results and Discussion}
@@ -340,8 +347,23 @@ It is mainly targeted at private users and can easily be executed having no tech
 
 Future work should target the further automation of the presented process, by establishing a bidirectional communication.
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
-This would also make it easier to initalize several motes at once, which because of lack of synchronization is currently quite tedious.
 
+To simplify the initialization of several motes at once, two things need be done.
+First, the app should stay in calibration and synchronization phase, until the user presses a button.
+Second, the mote should indicate via an LED that it reached the initialization phase~(\ref{sub:initialization}).
+With those two concepts, the key transmission to several motes could work as follows: 
+The user lays out all motes in a grid next to each other.
+Then the phone is placed on top of them and the app is started.
+All motes are placed, so that they receive the flickering of the phones flash light.
+The motes are started one after another.
+Once the motes are running, the user waits for all of them to indicate via an LED, that they reached the initialization phase.
+They are now all waiting for the initialization pattern.
+The user presses a button in the app and the phone sends the initialization pattern followed by the data packet.
+When the transmission is over, the user can see via a red LED which motes failed to receive the data correctly.
+The process needs to be restarted with those motes.
+
+
+% den Satz verstehe ich nicht 
 User-friendliness should be prioritized as success and adoption of this presented additional security measure will greatly benefit from it.
 
 
