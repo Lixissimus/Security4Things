@@ -39,11 +39,11 @@ Felix Wolff
 \and
 \alignauthor
 Christoph Meinel\\
-    \affaddr{\textit{Supervisior}}
+    \affaddr{\textit{Supervisor}}
 %
 \alignauthor
 Konrad-Felix Krentz\\
-    \affaddr{\textit{Supervisior}}
+    \affaddr{\textit{Supervisor}}
 }
 
 \maketitle
@@ -281,7 +281,7 @@ The Java implementation also benefits from the ability of the native Java timer 
 In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
 % , e.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
 This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
-Another advantage of this version is is the flash light.
+Another advantage of this version is the flash light.
 Depending on the smart phone model, the flash light was as fast as screen flickering even for small bit lengths, while being much brighter.
 Especially when attempting to program multiple motes at once this comes very handy.
 To improve usability and discoverability, we dropped controls for some parameters, which led to a much leaner design as shown in figure~\ref{fig:screenshots}.
@@ -291,11 +291,15 @@ However, as discussed in section~\ref{sec:results_and_discussion}, both versions
 \subsection{Mote}
 \label{sub:mote}
 
+The implementation on the mote is divided into two parts.
+The communication protocol and key storage is implemented in a Contiki process.
+For the mote to securely communicate, the link layer needs to be initialized using the transmitted key, which is accomplished by a link layer driver wrapper.
+
 \subsubsection{Contiki process}
 \label{ssub:contiki_process}
 
-On the mote, the communication protocol is implemented in a Contiki process.
-The Contiki operating system offers a real-time timer called \textit{rtimer} which eliminates timer inaccuracies on the mote side.
+The \textit{light process} implements the receiving side of the communication protocol.
+A real-time timer called \textit{rtimer}, which is offered by the Contiki operating system, eliminates timer inaccuracies on the mote side.
 The mote uses its light sensor to sense the current brightness.
 Once the process is started, an LED-countdown (red -> blue -> green) indicates the start of the key initialization procedure.
 A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(\ref{sub:calibration}).
@@ -308,20 +312,20 @@ A green LED shows that the key material has successfully been received and was s
 \subsubsection{Contiki driver wrapper}
 \label{ssub:contiki_driver_wrapper}
 
------ Maybe part about akes and how this fits together?! -----
-
-For the mote to actually use the key material that was transmitted, the initialization of the link layer security needs to be delayed until that finished successfully.
+For the mote to actually use the key material that was transmitted, the initialization of the link layer security needs to be delayed until the key transmission finished successfully.
 To do so we created a link layer driver wrapper that accomplishes the following things:
 
-\begin{itemize}
-	\item Delay/Cancel all calls to the link layer driver.
+\begin{enumerate}
+	\item Delay all calls to the link layer driver.
 	\item Check whether the key material was initialized before.
-	\item If not, start the light process and wait for successful initialization.
-	\item Forward all calls to the actual link layer driver.
-\end{itemize}
+	\item If not, start the \textit{light process} and wait for successful key transmission.
+	\item Initialize the link layer using the transmitted key material.
+	\item Forward all calls to the link layer driver.
+\end{enumerate}
 
-As seen in (code example), calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization has finished.
-Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper (and no further configuration needs to be done?).
+Calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization has finished.
+Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper.
+On the first start of the mote the key initialization via the \textit{light process} is triggered whereas during later starts the mote recognizes that its key material has been initialized before.
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
@@ -334,7 +338,6 @@ Also while testing different Android phones, we noticed each of it works best wi
 \begin{itemize}
 	\item measure and evaluate maximum transmission speed, error rate
 	\item is hamming code necessary (worth the doubled length) or CRC alone sufficient
-	\item "keep the phone busy" (wake up more often to prevent cpu from sleeping)
 \end{itemize}
 
 
