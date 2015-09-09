@@ -126,34 +126,46 @@ We conclude our work and give an outlook on what could be done next in section~\
 \section{Background and Related Work}
 \label{sec:related_work}
 
-- IoT requires own network stack because of special needs: energy and resources, e.g. batteries should work for multiple years and mote memory will be very small (e.g. 48kb program flash for telosB mote CITE SOURCE), many addresses needed
-- 6LowPan protocol stack as described in "Standardized protocol stack.." is tailoring this
-- its using own implementations of layers, e.g. PHY for physical layer, and CoaP as applicationlayer as well as conventional ones (namely IPv6 as Internet layer) --> enables IoT
+In order to make the IoT reality, a specialized network stack is needed.
+Motes have special constrains regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small (e.g. 48kb program flash for telosB mote, \cite{telosb}).
+Additionally, typical IoT setups will make use of hundreds of nodes, so there many more addresses needed than the traditional Internet uses.
 
-- there are some proposals for specialized security layers in this stack, e.g. akes \cite{krentz15akes}
-- akes uses session keys and a neighborhood-exploration-technique to gain sufficient security level, even surviving reboots
-- it still relies on predistributed keys on each mote
-- how to predistribute in safe way?
+The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring this needs.
+The criteria for IoT network stacks are, according to them: low power usage, high reliability, Internet-suitability.
+Therefore, tailored implementations of stack layers are presented, like \textit{PHY of IEEE 802.15.4}, which is a power saving physical/link layer.
+In order to be Internet-enabled regarding the need for huge amounts of addresses, IPv6 is utilized.
+However, in order to save energy, the headers of IPv6 packets are heavily compressed in 6LoWPAN.
 
-\cite{chen2011over} proposes key provisioning without wiring using eliptic curve cryptography --> expensive for memory and energy.
-- (own chips might solve this, but increase per unit cost)
+There are some proposals for specialized security measures in this stack, e.g. \textit{Adaptive Key Establishment Scheme (AKES)}, \cite{krentz15akes}.
+AKES makes use of session keys and a neighborhood-exploration-technique to gain sufficient security level while being memory saving.
+Security is even obtained after reboots of motes, but it relies on predistribution keys on each mote.
 
-\cite{kuo2007message} utilizes Faraday cage and another (third) radio jamming device for initialization.
--> requires special hardware
+The problem of wireless and user-friendly key predistribution / key provisioning remains.
+There are multiple approaches to solve this by securing the radio channel in some way, e.g.:
 
-6doku \cite{krentz20156doku} proposes pairing with smartphone and extra-hardware for pairing
-- extra hardware and motes need button
+\begin{itemize}
+	\item \cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC). However, while meeting high security standards, software implementations of ECC require a lot of memory space and energy while hardware implementations increase the per-unit cost.
+	\item In order to secure radio communication, \cite{kuo2007message} utilizes a Faraday cage in which a batch of motes can be programmed without interleaving of messages from an attacker outside of the cage. Additionally, another device outside of the cave jams radio waves to prevent malicious communication.
+	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled devices like an smart phone, \cite{krentz20156doku}. The smart phone needs extra hardware attached for communicating with the mote via radio waves. It relies on interaction with the end-user, e.g. he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
+\end{itemize}
 
-- some ideas to transmit keys via light:
+There are also some proposals for key predistribution using an alternative channel, i.g. light.
 
-- Blink 'Em All \cite{saxena2009blink} lets motes LEDs blink and computer with connected camera read it.
+\cite{saxena2009blink} proposes to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
+They are verified afterwards using the unidirectional light channel from the motes to the sink.
+However, they still rely on energy consuming asymmetric encryption.
 
-- LiDSN \cite{doan2012lidsn} same with special connector-hardware where mote gets put into. if mote has no led, light sensor is assumed and connector emits light. Proved as usable by end-user, but special hardware needed
+\textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote, \cite{doan2012lidsn}.
+Therefore, a temporal key for radio communication is transmitted to a specialized \textit{connector} via light.
+The communication via light can be either way: if the connector receives light from the motes LED, it reads it. If the mote has no LED, a light sensor is assumed and the connector emits light with an own led.
+It is shown, that key provisioning is both faster and easier for end users.
 
-- Electric Imp \cite{electricimp} sells proprietary BlinkUp technology: uses smart phone for flickering -> good for end users
-- not scientifically examined till now (as far as we know)
+\cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
+Instead of specialized hardware which end users might not want to buy, they provide a smart phone application which provisions a mote.
+Assuming most users who install IoT setups already own a smart phone, this seems to be a cost-effective alternative.
 
-thus, we propose a user-friendly wireless key provisioning protocols without additional hardware needed, just mote with light sensor and smart phone.
+However, we could not find that this approach is examined scientifically.
+Thus, we propose an protocol for secure and wireless key predistribution using a smart phone as light emitter and motes with a light sensor as receivers.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
@@ -257,7 +269,7 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 \section{Implementation}
 \label{sec:implementation}
 
-Project Light consists of an Android app that creates and sends the keying material and a Contiki\cite{dunkels04contiki} process that runs on the TelosB sky mote and receives and validates it.
+Project Light consists of an Android app that creates and sends the keying material and a Contiki process that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
 All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -292,6 +304,14 @@ Furthermore the timing accuracy was considerably limited by the overhead caused 
 % 	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
 % 	\label{fig:screenshots}
 % \end{figure}
+
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=.15]{images/screen_native.png}
+	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. Any text entered in the text field can be transmitted by tapping on ``start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
+	\label{fig:screenshot}
+\end{figure}
 
 To improve transmission reliability we therefore built a native Android application written in Java.
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
