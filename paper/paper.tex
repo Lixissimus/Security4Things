@@ -277,38 +277,34 @@ We have developed two different versions of the Android application for users to
 % Ich wuerde den gesamten folgenden Abschnitt weglassen und gar nicht so richtig ueber die js timer Sachen reden. Vielleicht lieber noch einen kurzen Abschnitt generell ueber timing Sachen?
 
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smart phone using Apache~Cordova\footnote{https://cordova.apache.org/}.
-Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone 8.1.
-In this version, almost all parameters for the transmission are adjustable by the user: length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
-Therefore it is convenient to experiment with various settings and transmission parameters and to test of the Contiki process.
+Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone.
+%In this version, almost all parameters for the transmission are adjustable by the user: length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
+%Therefore it is convenient to experiment with various settings and transmission parameters and to test of the Contiki process.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
-First, experiments using the flash light for light emission showed, that there are no predictable timing behavior, e.g. the flash light was simply to slow to allow short transmission times.
+The flash light cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
-Secondly, in order to get reliable transmission quality, we need to become as close to real-time as possible.
-This technology stack indicates bad real-time behavior, i.g. the Cordova runtime and the JavaScript interpreter could be omitted.
+Furthermore the timing accuracy was considerably limited by the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
 
-% bis hier hin weg
+% \begin{figure}
+% 	\centering
+% 	\includegraphics[scale=.35]{images/screenshots.png}
+% 	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
+% 	\label{fig:screenshots}
+% \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[scale=.35]{images/screenshots.png}
-	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
-	\label{fig:screenshots}
-\end{figure}
-
-% Und den dann natuerlich noch anpassen
-
-Hence, we built a native Android application written in Java.
+To improve transmission reliability we therefore built a native Android application written in Java.
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
-The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing errors do not add up.
+The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
 % , e.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
-This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
+%This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
 Another advantage of this version is the flash light.
-Depending on the smart phone model, the flash light was as fast as screen flickering even for small bit lengths, while being much brighter.
-Especially when attempting to program multiple motes at once this comes very handy.
-To improve usability and discoverability, we dropped controls for some parameters, which led to a much leaner design as shown in figure~\ref{fig:screenshots}.
+Depending on the smart phone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
+Especially when attempting to program multiple motes at once this comes in very handy.
+%To improve usability and discoverability, we dropped controls for some parameters, which led to a much leaner design as shown in figure~\ref{fig:screenshots}.
 
-However, as discussed in section~\ref{sec:results_and_discussion}, both versions worked well with similar values for the length of one bit.
+%However, as discussed in section~\ref{sec:results_and_discussion}, both versions worked well with similar values for the length of one bit.
+% Ich glaub das diskutieren wir nicht, das passt iwie nicht zur Aussage des Papers
 
 \subsection{Mote}
 \label{sub:mote}
