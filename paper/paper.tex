@@ -13,7 +13,7 @@
 \documentclass{sig-alternate} % v 2.5
 
 % --- Author Metadata here ---
-\conferenceinfo{Sample Conference}{'15 Potsdam, Germany}
+%\conferenceinfo{Sample Conference}{'15 Potsdam, Germany}
 %\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
@@ -61,7 +61,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \terms{Internet of Things, Security}
 
-\keywords{Internet of things, security, key transmission, light}
+\keywords{Internet of Things, security, key transmission, light}
 
 \section{Introduction}
 \label{sec:introduction}
@@ -126,30 +126,30 @@ We conclude our work and give an outlook on what could be done next in section~\
 \section{Background and Related Work}
 \label{sec:related_work}
 
-In order to make the IoT reality, a specialized network stack is needed.
-Motes have special constrains regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small (e.g. 48kb program flash for telosB mote, \cite{telosb}).
+In order to make the IoT a reality, a specialized network stack is needed.
+Motes have special constraints regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small\footnote{e.g. 48kb program flash for telosB mote, \cite{telosb}}.
 Additionally, typical IoT setups will make use of hundreds of nodes, so there many more addresses needed than the traditional Internet uses.
 
-The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring this needs.
-The criteria for IoT network stacks are, according to them: low power usage, high reliability, Internet-suitability.
+The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring these needs.
+The criteria for IoT network stacks are, according to them: low power usage, high reliability and Internet-suitability.
 Therefore, tailored implementations of stack layers are presented, like \textit{PHY of IEEE 802.15.4}, which is a power saving physical/link layer.
 In order to be Internet-enabled regarding the need for huge amounts of addresses, IPv6 is utilized.
 However, in order to save energy, the headers of IPv6 packets are heavily compressed in 6LoWPAN.
 
 There are some proposals for specialized security measures in this stack, e.g. \textit{Adaptive Key Establishment Scheme (AKES)}, \cite{krentz15akes}.
-AKES makes use of session keys and a neighborhood-exploration-technique to gain sufficient security level while being memory saving.
-Security is even obtained after reboots of motes, but it relies on predistribution keys on each mote.
+AKES makes use of session keys and a neighborhood-exploration-technique to gain a sufficient security level while being memory saving.
+Security is even obtained after reboots of motes, but it relies on predistributed keys on each mote.
 
 The problem of wireless and user-friendly key predistribution / key provisioning remains.
 There are multiple approaches to solve this by securing the radio channel in some way, e.g.:
 
 \begin{itemize}
-	\item \cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC). However, while meeting high security standards, software implementations of ECC require a lot of memory space and energy while hardware implementations increase the per-unit cost.
+	\item \cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC). However, while meeting high security standards, software implementations of ECC require a lot of memory and energy while hardware implementations increase the per-unit cost.
 	\item In order to secure radio communication, \cite{kuo2007message} utilizes a Faraday cage in which a batch of motes can be programmed without interleaving of messages from an attacker outside of the cage. Additionally, another device outside of the cave jams radio waves to prevent malicious communication.
-	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled devices like an smart phone, \cite{krentz20156doku}. The smart phone needs extra hardware attached for communicating with the mote via radio waves. It relies on interaction with the end-user, e.g. he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
+	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled device like a smart phone, \cite{krentz20156doku}. The smart phone needs extra hardware attached to communicate with the mote via radio waves. It relies on interaction with the end-user as he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
 \end{itemize}
 
-There are also some proposals for key predistribution using an alternative channel, i.g. light.
+There are also some proposals for key predistribution using an alternative channel, i.e. light.
 
 \cite{saxena2009blink} proposes to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
 They are verified afterwards using the unidirectional light channel from the motes to the sink.
@@ -165,7 +165,7 @@ Instead of specialized hardware which end users might not want to buy, they prov
 Assuming most users who install IoT setups already own a smart phone, this seems to be a cost-effective alternative.
 
 However, we could not find that this approach is examined scientifically.
-Thus, we propose an protocol for secure and wireless key predistribution using a smart phone as light emitter and motes with a light sensor as receivers.
+Thus, we propose a protocol for secure and wireless key predistribution using a smart phone as a light emitter and motes with a light sensor as receivers.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
@@ -287,29 +287,17 @@ In the following sections, both the implementation of the Android application an
 
 We have developed two different versions of the Android application for users to enter keys and transmit them.
 
-% Ich wuerde den gesamten folgenden Abschnitt weglassen und gar nicht so richtig ueber die js timer Sachen reden. Vielleicht lieber noch einen kurzen Abschnitt generell ueber timing Sachen?
-
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smart phone using Apache~Cordova\footnote{https://cordova.apache.org/}.
 Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone.
-%In this version, almost all parameters for the transmission are adjustable by the user: length of one bit, length of initialization phase, initialization-pattern, start-pattern, if hamming-encoding should be used.
-%Therefore it is convenient to experiment with various settings and transmission parameters and to test of the Contiki process.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
 The flash light cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
 Furthermore the timing accuracy was considerably limited by the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
 
-% \begin{figure}
-% 	\centering
-% 	\includegraphics[scale=.35]{images/screenshots.png}
-% 	\caption{The two Android App versions side-by-side (web on the left, native on the right).}
-% 	\label{fig:screenshots}
-% \end{figure}
-
-
 \begin{figure}
 	\centering
 	\includegraphics[scale=.15]{images/screen_native.png}
-	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. Any text entered in the text field can be transmitted by tapping on ``start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
+	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. Any text entered in the text field can be transmitted by tapping on ``Start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
 	\label{fig:screenshot}
 \end{figure}
 
@@ -317,15 +305,10 @@ To improve transmission reliability we therefore built a native Android applicat
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
 The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
-% , e.g. if one event is fired too late such as wrong bit gets transmitted, the delay does not add up for the next bit.
-%This comes hand-in-hand with the Hamming(8,4)-encoding we used, because this could fix potential one-bit-errors in each byte.
 Another advantage of this version is the flash light.
 Depending on the smart phone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
 Especially when attempting to program multiple motes at once this comes in very handy.
-%To improve usability and discoverability, we dropped controls for some parameters, which led to a much leaner design as shown in figure~\ref{fig:screenshots}.
 
-%However, as discussed in section~\ref{sec:results_and_discussion}, both versions worked well with similar values for the length of one bit.
-% Ich glaub das diskutieren wir nicht, das passt iwie nicht zur Aussage des Papers
 
 \subsection{Mote}
 \label{sub:mote}
@@ -347,7 +330,6 @@ After the successful calibration, synchronization and initialization a blue LED 
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
 A green LED shows that the key material has successfully been received and was saved to the permanent flash memory of the mote.
 
-
 \subsubsection{Contiki driver wrapper}
 \label{ssub:contiki_driver_wrapper}
 
@@ -365,6 +347,7 @@ To do so we created a link layer driver wrapper that accomplishes the following 
 Calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization has finished.
 Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper.
 On the first start of the mote the key initialization via the \textit{light process} is triggered whereas during later starts the mote recognizes that its key material has been initialized before.
+
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
