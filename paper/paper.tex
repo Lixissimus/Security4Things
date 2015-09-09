@@ -69,7 +69,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 The Internet of Things (IoT) is becoming more and more of a reality every day.
 It consists of small devices (called \textit{motes}), which are connected to the public Internet.
 They work together, allowing monitoring and controlling of several kinds of real-world systems. % SOURCE!
-E.g., motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
+An example are motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
 
 In the last decades, the rise of embedded systems changed daily lives. % Source?
 However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
@@ -78,8 +78,8 @@ Because of the huge variety of valuable possibilities, the impact of embedded sy
 However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
 New, adapted security measurements had to be developed and implemented to react to this.
 For example, Adaptive Key Establishment Scheme (AKES) provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices. % SOURCE!
-Nevertheless, one problem remains: IoT setups usually consist of plentiful nodes which all need to be initialized with keying material and parameters.
-This is a major problem, because typical motes lack of input/output devices which are securely usable without configured networking.
+Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be initialized with keying material and parameters.
+This is a major problem, because typical motes lack input/output devices which are securely usable without configured networking.
 
 % figure is inserted here to be shown on page 1
 \begin{figure}
@@ -90,16 +90,16 @@ This is a major problem, because typical motes lack of input/output devices whic
 \end{figure}
 
 One possibility is to plug a wire to each and every node in order to initialize it.
-However, there are two downsides: first, a typical IoT setup consist of too many devices to be plugging a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
+However, there are two downsides: First, a typical IoT setup consists of too many devices for plugging to be a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
 
 Another approach is to pre-initialize the keys in the factory.
-This would mean that either there is a small set of assigned keys, which would lead to vulnerabilities to brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be affordable in great numbers.}.
+This would mean that either there is a small set of assigned keys, which would lead to possible brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be affordable in great numbers.}.
 Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
 
 This paper proposes an alternative way, which is transmitting initial keying material via light.
 It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
-As to be seen in fig.~\ref{fig:overview}, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
+As visible in Figure~\ref{fig:overview}, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
 The mote receives the message via a light sensor and reconstructs the keys.
 After successful initialization and verification, the mote saves the keying material permanently.
 On subsequent reboots, it is read from memory and immediately usable without any further action required.
@@ -115,11 +115,11 @@ Contiki is an open source, state-of-the-art operating system for IoT devices\foo
 We also tested some techniques to make the transmission error-prone.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
-The rest of the paper is structured as follows:
+The remainder of the paper is structured as follows:
 Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key initialization.
 In section~\ref{sec:communication_protocol}, we propose our protocol for the smart phone and the mote to communicate via light.
 Details of our implementations are presented in section~\ref{sec:implementation}, both for the emitting~(sec.~\ref{sub:android_app}) and the receiving~(sec.~\ref{sub:mote}) parts.
-In section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and it's limits.
+In section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and its limits.
 We conclude our work and give an outlook on what could be done next in section~\ref{sec:future_work}.
 
 
