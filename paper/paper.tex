@@ -110,8 +110,8 @@ The physics of light is well understood by non-technical people, in contrast to 
 Thus, leaking of the wireless sent secrets is less likely.
 Moreover, multiple devices could be initialized concurrently by just placing them next to each other.
 
-We implemented a prototype for an Android smart phone and a mote running the Contiki OS\footnote{http://www.contiki-os.org/}.
-Contiki is an open source, state-of-the-art operating system for IoT devices.
+We implemented a prototype for an Android smart phone and a mote running the Contiki OS, \cite{dunkels04contiki}.
+Contiki is an open source, state-of-the-art operating system for IoT devices\footnote{http://www.contiki-os.org/}.
 We also tested some techniques to make the transmission error-prone.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
@@ -126,33 +126,34 @@ We conclude our work and give an outlook on what could be done next in section~\
 \section{Background and Related Work}
 \label{sec:related_work}
 
-- first background of our work, than alternative solutions
+- IoT requires own network stack because of special needs: energy and resources, e.g. batteries should work for multiple years and mote memory will be very small (e.g. 48kb program flash for telosB mote CITE SOURCE), many addresses needed
+- 6LowPan protocol stack as described in "Standardized protocol stack.." is tailoring this
+- its using own implementations of layers, e.g. PHY for physical layer, and CoaP as applicationlayer as well as conventional ones (namely IPv6 as Internet layer) --> enables IoT
 
-\subsection{Background}
+- there are some proposals for specialized security layers in this stack, e.g. akes \cite{krentz15akes}
+- akes uses session keys and a neighborhood-exploration-technique to gain sufficient security level, even surviving reboots
+- it still relies on predistributed keys on each mote
+- how to predistribute in safe way?
 
+\cite{chen2011over} proposes key provisioning without wiring using eliptic curve cryptography --> expensive for memory and energy.
+- (own chips might solve this, but increase per unit cost)
 
-- background:
-	- "Standardized Protocol Stack..."\cite{palattella2013standardized} describes network stack for iot, maybe implemented in contiki
-	- akes\cite{krentz15akes}
-- related work:
-	- webseite mit flickerer\cite{electricimp}
-	- LiDSN\cite{doan2012lidsn}
-	- message in a bottle\cite{kuo2007message}: init keys within Faraday cage, jam radio with outside device
-	- Blink ’Em All\cite{saxena2009blink}: communication via light, but other way round: motes blink and camera parses it.
-	- "Over the Air Provisioning..."\cite{chen2011over} uses eliptic curve crytpography, which needs a lot of space on the mote
-	- smart sys tech 2015\cite{krentz20156doku}:
-		- 6Doku protocol --> successor of sudoku protocol (diffie hellman, etc.)
-		- touch-device with 6lowpan transmitter as (mother duck)
-		- press butttons on motes and touchscreen on mother duck --> pair them
-		-
+\cite{kuo2007message} utilizes Faraday cage and another (third) radio jamming device for initialization.
+-> requires special hardware
 
+6doku \cite{krentz20156doku} proposes pairing with smartphone and extra-hardware for pairing
+- extra hardware and motes need button
 
+- some ideas to transmit keys via light:
 
-\begin{itemize}
-	\item LiDSN: A Method to Deploy Wireless Sensor Networks Securely based on light communication
-	\item ...
-\end{itemize}
+- Blink 'Em All \cite{saxena2009blink} lets motes LEDs blink and computer with connected camera read it.
 
+- LiDSN \cite{doan2012lidsn} same with special connector-hardware where mote gets put into. if mote has no led, light sensor is assumed and connector emits light. Proved as usable by end-user, but special hardware needed
+
+- Electric Imp \cite{electricimp} sells proprietary BlinkUp technology: uses smart phone for flickering -> good for end users
+- not scientifically examined till now (as far as we know)
+
+thus, we propose a user-friendly wireless key provisioning protocols without additional hardware needed, just mote with light sensor and smart phone.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
