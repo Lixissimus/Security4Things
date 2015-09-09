@@ -1,5 +1,7 @@
 # Security4Things
-Repository for the lecture Security for the Internet of Things. There is an Android app related to this project, it can be found [here](https://github.com/0x203/Flickerer).
+Contiki Process for visual decoding.
+
+It will be used in the seminar ["Security for the Internet of Things"](http://hpi.de/studium/lehrveranstaltungen/it-systems-engineering/lehrveranstaltung/course/2015/identity_management.html) in order to receive from an Android app via its light sensor. The app related to this project can be found [here](https://github.com/0x203/Flickerer).
 
 The paper explaining the use and benefit of this Contiki process will be linked here.
 
