@@ -66,7 +66,7 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \section{Introduction}
 \label{sec:introduction}
 
-The Internet of Things (IoT) is becoming more and more reality every day.
+The Internet of Things (IoT) is becoming more and more of a reality every day.
 It consists of small devices (called \textit{motes}), which are connected to the public Internet.
 They work together, allowing monitoring and controlling of several kinds of real-world systems. % SOURCE!
 E.g., motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
@@ -366,11 +366,12 @@ Also while testing different Android phones, we noticed each of it works best wi
 
 In this paper, we presented a secure method for IoT-device initialization by transmitting initial keying material via light.
 It is mainly targeted at private users and can easily be executed having no technical background at all.
+As the visibility of light can be judged and restricted pretty well by end users, safety from interception is given.
 
 Future work should target the further automation of the presented process, by establishing a bidirectional communication.
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
-To simplify the initialization of several motes at once, two things need be done.
+To simplify the initialization of several motes at once, two things need to be done.
 First, the app should stay in calibration and synchronization phase, until the user presses a button.
 Second, the mote should indicate via an LED that it reached the initialization phase~(\ref{sub:initialization}).
 With those two concepts, the key transmission to several motes could work as follows:
@@ -383,10 +384,6 @@ They are now all waiting for the initialization pattern.
 The user presses a button in the app and the phone sends the initialization pattern followed by the data packet.
 When the transmission is over, the user can see via a red LED which motes failed to receive the data correctly.
 The process needs to be restarted with those motes.
-
-
-% den Satz verstehe ich nicht
-User-friendliness should be prioritized as success and adoption of this presented additional security measure will greatly benefit from it.
 
 
 % Bibliography
