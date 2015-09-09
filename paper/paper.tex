@@ -374,6 +374,29 @@ However it certainly introduces possible errors as the mote has to recognize the
 We decided against fixating it, as during our experiments the mote in all cases determined the correct transmission rate.
 Also while testing different Android phones, we noticed each of it works best with a different transmission rate, so the app should change it depending on the phone model.
 
+Figure~\ref{fig:successful_transmissions} shows the number of successful transmissions plotted against different transmission rates. 
+We used two different phones for measuring those values.
+One is a \textit{Samsung Galaxy S2}, the other one is a \textit{Samsung Galaxy A3}.
+As we can see, the \textit{A3} is able to send data at a considerabley higher transmission rate than the \textit{S2}.
+While the \textit{A3} transmits reliably with a period length of 15ms, the \textit{S2} should not be used with a period length less than 62ms.
+One reason for that could be that the \textit{A3} is considerably newer compared to the \textit{S2}.
+
+We also tested the transmission reliability with a \textit{Motorola MotoG (2nd generation)} and an \textit{LG Nexus 5}.
+Both showed very poor performance at arbitrary period lengths and we are not shure why.
+One possible explanation is, that the CPU of those phones is saving energy too aggressively.
+This effect was already seen in \cite{mongia2010reliable}.
+Maybe different phone model are affected differently by that.
+
+
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=.35]{images/successful-transmissions.png}
+	\caption{The light gray bars show the number of successful transmissions of the Samsung Galaxy A3, the dark gray bars the ones of the Samsung Galaxy S2. These are the results of 10 transmissions per period length. The transmitted string had a length of 16 characters and Hamming encoding was used.}
+	\label{fig:successful_transmissions}
+\end{figure}
+
+
 \begin{itemize}
 	\item measure and evaluate maximum transmission speed, error rate
 	\item is hamming code necessary (worth the doubled length) or CRC alone sufficient
