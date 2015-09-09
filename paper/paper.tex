@@ -142,7 +142,7 @@ Security is even obtained after reboots.
 It still relies on predistribution keys on each mote.
 
 The problem of wireless and user-friendly key predistribution / key provisioning remains.
-There are multiple approaches to solve this:
+There are multiple approaches to solve this by securing the radio channel in some way, e.g.:
 
 \begin{itemize}
 	\item \cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC). However, while meeting high security standards, software implementations of ECC require a lot of memory space and energy while hardware implementations increase the per-unit cost.
@@ -150,16 +150,22 @@ There are multiple approaches to solve this:
 	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled devices like an smart phone, \cite{krentz20156doku}. The smart phone needs extra hardware attached for communicating with the mote via radio waves. It relies on interaction with the end-user, e.g. he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
 \end{itemize}
 
-- some ideas to transmit keys via light:
+There are also some proposals for key predistribution using an alternative channel, i.g. light.
 
-- Blink 'Em All \cite{saxena2009blink} lets motes LEDs blink and computer with connected camera read it.
+\cite{saxena2009blink} proposes to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
+They are then verified using the unidirectional light channel from the motes to the sink.
 
-- LiDSN \cite{doan2012lidsn} same with special connector-hardware where mote gets put into. if mote has no led, light sensor is assumed and connector emits light. Proved as usable by end-user, but special hardware needed
+\textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote, \cite{doan2012lidsn}.
+Therefore, a temporal key for radio communication is transmitted to a specialized \textit{connector} via light.
+The communication via light can be either way: if the connector receives light from the motes LED, it reads it. If the mote has no LED, a light sensor is assumed and the connector emits light with an own led.
+It is shown, that key provisioning is both faster and easier for end users.
 
-- Electric Imp \cite{electricimp} sells proprietary BlinkUp technology: uses smart phone for flickering -> good for end users
-- not scientifically examined till now (as far as we know)
+\cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
+Instead of specialized hardware which end users might not want to buy, they provide a smart phone application which provisions a mote.
+Assuming most users who install IoT setups already own a smart phone, this seems to be a cost-effective alternative.
 
-thus, we propose a user-friendly wireless key provisioning protocols without additional hardware needed, just mote with light sensor and smart phone.
+However, we could not find that this approach is examined scientifically.
+Thus, we propose an protocol for secure and wireless key predistribution using a smart phone as light emitter and motes with a light sensor as receivers.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
