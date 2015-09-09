@@ -101,6 +101,7 @@ char useHamming = 0;
 unsigned char dataBuffer[16];
 unsigned char curChar = '\0';
 int bitsRead = 0;
+int correctedBits = 0;
 
 // LOOP
 struct rtimer rt;
@@ -146,12 +147,6 @@ void calibrate(int newValue) {
   buildClusters(window, KMEANS_VALUES, K_CLUSTERS, &kmeans);
 
   phase = SYNCHRONIZE;
-
-  PRINTF("\nCalibration finished, cluster means are:");
-  for (i = 0; i < kmeans.k; i++) {
-    PRINTF(" %d", kmeans.centers[i]);
-  }
-  PRINTF("\n");
 }
 
 unsigned char getBinaryValue(int intValue) {
@@ -186,8 +181,6 @@ void initialize(int value) {
   last8bits = last8bits << 1;
   last8bits += initValue;
 
-  PRINTF("%d", initValue);
-
   if (last8bits == INIT_PATTERN || last8bits == INIT_PATTERN_HAMMING) {
     if (last8bits == INIT_PATTERN_HAMMING) useHamming = 1;
     // check here, if we received the init patter for active hamming code
@@ -218,7 +211,7 @@ int read(int value, unsigned char* readBuffer, unsigned int readBufferBytesRead,
       activateLED(LEDS_RED);
       phase = EXIT;
     } else if (hammingError1 == ONE_BIT_ERROR || hammingError2 == ONE_BIT_ERROR) {
-      // error was corrected
+      correctedBits++;
     }
 
     // decode the hamming codes into the bits of the transmitted character
@@ -309,6 +302,7 @@ void loop() {
       key_flash_append_keying_material(data, AES_128_KEY_LENGTH);
       uint8_t initialized = 1;
       key_flash_append_keying_material(&initialized, 1);
+      PRINTF("corrected bits: %d\n", correctedBits);
     } else {
       activateLED(LEDS_RED);
     }
@@ -345,6 +339,7 @@ PROCESS_THREAD(light_app_process, ev, data)
   while(phase != EXIT) {
     PROCESS_YIELD();
   }
+
 
   leds_off(LEDS_ALL);
 
