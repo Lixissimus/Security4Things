@@ -127,7 +127,6 @@ We conclude our work and give an outlook on what could be done next in section~\
 
 In order to make the IoT a reality, a specialized network stack is needed.
 Motes have special constraints regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small\footnote{e.g. 48kb program flash for telosB mote, \cite{telosb}}.
-Additionally, typical IoT setups will make use of hundreds of nodes, so there many more addresses needed than the traditional Internet uses.
 
 The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring these needs.
 The criteria for IoT network stacks are, according to them: low power usage, high reliability and Internet-suitability.
@@ -171,7 +170,7 @@ Thus, we propose a protocol for secure and wireless key predistribution using a 
 
 In the following section, we describe the phases of the protocol.
 Each phase contains the necessary steps for the Android device and the mote.
-Insights into the concrete implementation will be given in the Section~\ref{sec:implementation}.
+Insights into the concrete implementation will be given in Section~\ref{sec:implementation}.
 
 \subsection{Calibration}
 \label{sub:calibration}
@@ -369,8 +368,6 @@ One possible explanation is, that the CPU of those phones is saving energy too a
 This effect was already seen in \cite{mongia2010reliable}.
 Maybe different phone model are affected differently by that.
 
-
-
 \begin{figure}
 	\centering
 	\includegraphics[scale=.35]{images/successful-transmissions.png}
@@ -378,11 +375,17 @@ Maybe different phone model are affected differently by that.
 	\label{fig:successful_transmissions}
 \end{figure}
 
-
-\begin{itemize}
-	\item measure and evaluate maximum transmission speed, error rate
-	\item is hamming code necessary (worth the doubled length) or CRC alone sufficient
-\end{itemize}
+Another thing to think about is the usefulness of the \textit{Hamming(8,4)-code}.
+While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent. 
+When analyzing the number of corrected bits depending on the transmission rate, it behaves as follows:
+With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
+When accelerating the transmission, there is a point where many bits are corrected, but the transmission normally succeeds.
+If the transmission speed is then set even higher, the whole transmission fails most of the time due to irrecoverable errors.
+These points are 15ms for the \textit{A3} and 63ms for the \textit{S2} (see Figure~\ref{fig:successful_transmissions}).
+When we want to achieve the transmission speed of the \textit{A3} with 15ms, we can either use the 15ms and Hamming encoding to correct the bits, or we can halve the amount of data by deactivating the Hamming encoding and transmit with 31ms\footnote{The values are rounded, that's why the half of 31 is 15.}.
+So the transmission takes the same time, but actually increases the percentage of successful transmissions.
+Errors can still be detected afterwards using the \textit{CRC32} checksum.
+Therefore, the \textit{Hamming(8,4)-code} is not useful in that case.
 
 
 
@@ -393,7 +396,7 @@ In this paper, we presented a secure method for IoT-device initialization by tra
 It is mainly targeted at private users and can easily be executed having no technical background at all.
 As the visibility of light can be judged and restricted pretty well by end users, safety from interception is given.
 
-Future work should target the further automation of the presented process, by establishing a bidirectional communication.
+Future work should target the further automation of the presented process, e.g. by establishing a bidirectional communication.
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
 To simplify the initialization of several motes at once, two things need to be done.
@@ -402,14 +405,14 @@ Second, the mote should indicate via an LED that it reached the initialization p
 With those two concepts, the key transmission to several motes could work as follows:
 The user lays out all motes in a grid next to each other.
 Then the phone is placed on top of them and the app is started.
-All motes are placed, so that they receive the flickering of the phones flash light.
+All motes are placed, so that they receive the flickering of the flash light.
 The motes are started one after another.
 Once the motes are running, the user waits for all of them to indicate via an LED, that they reached the initialization phase.
 They are now all waiting for the initialization pattern.
 The user presses a button in the app and the phone sends the initialization pattern followed by the data packet.
 When the transmission is over, the user can see via a red LED which motes failed to receive the data correctly.
 The process needs to be restarted with those motes.
-
+However, this is not implemented and tested yet and could be part of future projects.
 
 % Bibliography
 \bibliographystyle{ACM-Reference-Format-Journals}

@@ -6,7 +6,7 @@ It will be used in the seminar ["Security for the Internet of Things"](http://hp
 The paper explaining the use and benefit of this Contiki process will be linked here.
 
 ## Setup
-Init and update the submodule by doing the following after cloning this repo:
+Init and update the Contiki submodule by doing the following after cloning this repo:
 ~~~ sh
 $ cd Security4Things
 $ git submodule init
