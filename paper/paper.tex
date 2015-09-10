@@ -268,7 +268,7 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 \section{Implementation}
 \label{sec:implementation}
 
-Project Light consists of an Android app that creates and sends the keying material and a Contiki process that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
+Project Light consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
 All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
