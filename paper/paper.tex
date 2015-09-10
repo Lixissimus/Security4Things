@@ -108,7 +108,7 @@ On subsequent reboots, it is read from memory and immediately usable without any
 There are several advantages of this method.
 Light sensors are smaller and less misusable than jacks.
 The physics of light is well understood by non-technical people, in contrast to radio waves.
-Thus, leaking of the wireless sent secrets is less likely.
+Thus, leaking of the wirelessly sent secrets is less likely.
 Moreover, multiple devices could be initialized concurrently by just placing them next to each other.
 
 We implemented a prototype for an Android smart phone and a mote running the Contiki OS, \cite{dunkels04contiki}.
@@ -127,7 +127,7 @@ We conclude our work and give an outlook on what could be done next in section~\
 \section{Background and Related Work}
 \label{sec:related_work}
 
-In order to make the IoT a reality, a specialized network stack is needed.
+In order to make the IoT reality, a specialized network stack is needed.
 Motes have special constraints regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small\footnote{e.g. 48kb program flash for telosB mote, \cite{telosb}}.
 
 The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring these needs.
@@ -197,7 +197,7 @@ After that, the mote is able to classify new light values and thus can read bits
 During synchronization, the mote learns the period length $T$.
 This is necessary to be able to read light values at the right time (see Figure~\ref{fig:read_a_bit}).
 
-In this phase, the phone just keeps sending \textit{bright} and \textit{dark} values with the period length $T$.
+In this phase, the phone keeps sending \textit{bright} and \textit{dark} values with the period length $T$.
 This is the same as during calibration.
 
 The mote on the other hand now measures light values as fast as it can and classifies them as \textit{0} and \textit{1}.
@@ -327,7 +327,7 @@ A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{br
 Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
 After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
-A green LED shows that the key material has successfully been received and was saved to the permanent flash memory of the mote.
+A green LED shows that the key material has been received successfully and was saved to the permanent flash memory of the mote.
 
 \subsubsection{Contiki driver wrapper}
 \label{ssub:contiki_driver_wrapper}
@@ -367,7 +367,7 @@ We also tested the transmission reliability with a \textit{Motorola MotoG (2nd g
 Both showed very poor performance at arbitrary period lengths.
 One possible explanation for this is, that the CPU of those phones is saving energy too aggressively.
 This effect was already seen in \cite{mongia2010reliable}.
-Different phone model may be affected differently by that.
+Different phone models seem to be affected differently by that.
 
 \begin{figure}
 	\centering
@@ -378,7 +378,7 @@ Different phone model may be affected differently by that.
 
 Another subject of debate is the \textit{Hamming(8,4)-code}.
 While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent.
-When analyzing the number of corrected bits depending on the transmission rate, the following ca be shown:
+When analyzing the number of corrected bits depending on the transmission rate, the following can be shown:
 With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
 When accelerating the transmission, there is a point where many bits are corrected, but the transmission normally succeeds.
 If the transmission speed is then set even higher, the whole transmission fails most of the time due to irrecoverable errors.
@@ -401,11 +401,11 @@ Future work should target the further automation of the presented process, e.g. 
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
 To simplify the initialization of several motes at once, two things need to be done.
-First, the application should stay in calibration and synchronization phase, until the user presses a button.
+First, the Android application should stay in calibration and synchronization phase, until the user presses a button.
 Second, the mote should indicate via an LED that it reached the initialization phase~(\ref{sub:initialization}).
 With those two concepts, the key transmission to several motes could work as follows:
 The user lays out all motes in a grid next to each other.
-Then the phone is placed on top of them and the application is started.
+Then the phone is placed on top of them and the app is started.
 All motes are placed, so that they receive the flickering of the flash light.
 The motes are started one after another.
 Once the motes are running, the user waits for all of them to indicate via an LED, that they reached the initialization phase.
