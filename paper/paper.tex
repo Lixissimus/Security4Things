@@ -18,6 +18,8 @@
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
 
+\hyphenation{Ham-ming}
+
 \begin{document}
 
 \title{Key Provisioning for Internet of Things via Light}
@@ -70,14 +72,14 @@ The transmission can be executed using an off-the-shelf smart phone and doesn't 
 The Internet of Things (IoT) is becoming more and more of a reality every day.
 It consists of small devices (called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
 They work together, allowing monitoring and controlling of several kinds of real-world systems.
-An example are motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
+An example are motes collecting information about parking lot occupancy, allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
 
 In the last decades, the rise of embedded systems changed daily lives.
 However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
 Because of the huge variety of valuable possibilities, the impact of embedded systems will be advanced even further within the IoT.
 
 However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
-New, adapted security measurements had to be developed and implemented to react to this.
+New security measures had to be developed and implemented to react to this.
 For example, \textit{Adaptive Key Establishment Scheme (AKES)} provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
 Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be initialized with keying material and parameters.
 This is a major problem, because typical motes lack input/output devices which are securely usable without configured networking.
@@ -128,7 +130,7 @@ We conclude our work and give an outlook on what could be done next in section~\
 \label{sec:related_work}
 
 In order to make the IoT reality, a specialized network stack is needed.
-Motes have special constraints regarding energy and memory resources, e.g. batteries should work for multiple years and a mote's program memory will be very small\footnote{e.g. 48kb program flash for telosB mote, \cite{telosb}}.
+Motes have special constraints regarding energy and memory resources, e.g. batteries should work for multiple years and a motes program memory will be very small\footnote{e.g. 48kb program flash for telosB mote, \cite{telosb}}.
 
 The \textit{IPv6 over Low-Power Wireless Personal Area Networks (6LoWPAN)} protocol stack as described in \cite{palattella2013standardized} is tailoring these needs.
 The criteria for IoT network stacks are, according to them: low power usage, high reliability and Internet-suitability.
@@ -219,7 +221,7 @@ However, the actual implementation slightly differs from that figure, see Sectio
 \subsection{Initialization}
 \label{sub:initialization}
 
-The target of the initialization phase is to tell the mote when the actual data starts.
+The target of the initialization phase is to tell the mote when the actual data transmission starts.
 The communication between the mote and the phone is one-way.
 That means, the mote cannot communicate with the Android application.
 Therefore, the application has to guess when the mote has successfully done calibration and synchronization.
@@ -271,10 +273,10 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 The implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
-All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
+All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
 
 The \textit{CRC32} is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
-This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
+This could be caused by 3-or-more-bit errors that the Hamming code failed to detect.
 
 As the Android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
 It is at the very end of a period to maximize error avoidance due to timer delays\footnote{The Contiki timer that triggers the reading of the bit is a real-time timer.}.
@@ -323,7 +325,7 @@ The \textit{light process} implements the receiving side of the communication pr
 A real-time timer called \textit{rtimer}, which is offered by the Contiki operating system, eliminates timer inaccuracies on the mote side.
 The mote uses its light sensor to sense the current brightness.
 Once the process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key initialization procedure.
-A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(\ref{sub:calibration}).
+A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(see \ref{sub:calibration}).
 Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
 After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
@@ -376,7 +378,7 @@ Different phone models seem to be affected differently by that.
 	\label{fig:successful_transmissions}
 \end{figure}
 
-Another subject of debate is the \textit{Hamming(8,4)-code}.
+Subject of debate is also the \textit{Hamming(8,4)-code}.
 While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent.
 When analyzing the number of corrected bits depending on the transmission rate, the following can be shown:
 With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
@@ -402,7 +404,7 @@ Using its camera the mobile phone could detect the current LED-state of the mote
 
 To simplify the initialization of several motes at once, two things need to be done.
 First, the Android application should stay in calibration and synchronization phase, until the user presses a button.
-Second, the mote should indicate via an LED that it reached the initialization phase~(\ref{sub:initialization}).
+Second, the mote should indicate via an LED that it reached the initialization phase~(see \ref{sub:initialization}).
 With those two concepts, the key transmission to several motes could work as follows:
 The user lays out all motes in a grid next to each other.
 Then the phone is placed on top of them and the app is started.
