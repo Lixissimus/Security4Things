@@ -66,17 +66,17 @@ The transmission can be executed using an off-the-shelf smart phone and doesn't 
 \label{sec:introduction}
 
 The Internet of Things (IoT) is becoming more and more of a reality every day.
-It consists of small devices (called \textit{motes}), which are connected to the public Internet.
-They work together, allowing monitoring and controlling of several kinds of real-world systems. % SOURCE!
+It consists of small devices (called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
+They work together, allowing monitoring and controlling of several kinds of real-world systems.
 An example are motes collecting information about parking lot occupancy allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
 
-In the last decades, the rise of embedded systems changed daily lives. % Source?
+In the last decades, the rise of embedded systems changed daily lives.
 However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
 Because of the huge variety of valuable possibilities, the impact of embedded systems will be advanced even further within the IoT.
 
 However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
 New, adapted security measurements had to be developed and implemented to react to this.
-For example, Adaptive Key Establishment Scheme (AKES) provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices. % SOURCE!
+For example, Adaptive Key Establishment Scheme (AKES) provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
 Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be initialized with keying material and parameters.
 This is a major problem, because typical motes lack input/output devices which are securely usable without configured networking.
 
@@ -156,7 +156,7 @@ However, they still rely on energy consuming asymmetric encryption.
 
 \textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote, \cite{doan2012lidsn}.
 Therefore, a temporal key for radio communication is transmitted to a specialized \textit{connector} via light.
-The communication via light can be either way: if the connector receives light from the motes LED, it reads it. If the mote has no LED, a light sensor is assumed and the connector emits light with an own led.
+The communication via light can be either way: if the connector receives light from the motes LED, it reads it. If the mote has no LED, a light sensor is assumed and the connector emits light with an own LED.
 It is shown, that key provisioning is both faster and easier for end users.
 
 \cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
@@ -356,7 +356,7 @@ However it certainly introduces possible errors as the mote has to recognize the
 We decided against fixating it, as during our experiments the mote in all cases determined the correct transmission rate.
 Also while testing different Android phones, we noticed each of it works best with a different transmission rate, so the app should change it depending on the phone model.
 
-Figure~\ref{fig:successful_transmissions} shows the number of successful transmissions plotted against different transmission rates. 
+Figure~\ref{fig:successful_transmissions} shows the number of successful transmissions plotted against different transmission rates.
 We used two different phones for measuring those values.
 One is a \textit{Samsung Galaxy S2}, the other one is a \textit{Samsung Galaxy A3}.
 As we can see, the \textit{A3} is able to send data at a considerabley higher transmission rate than the \textit{S2}.
