@@ -78,7 +78,7 @@ Because of the huge variety of valuable possibilities, the impact of embedded sy
 
 However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
 New, adapted security measurements had to be developed and implemented to react to this.
-For example, Adaptive Key Establishment Scheme (AKES) provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
+For example, \textit{Adaptive Key Establishment Scheme (AKES)} provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
 Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be initialized with keying material and parameters.
 This is a major problem, because typical motes lack input/output devices which are securely usable without configured networking.
 
@@ -136,7 +136,7 @@ Therefore, tailored implementations of stack layers are presented, like \textit{
 In order to be Internet-enabled regarding the need for huge amounts of addresses, IPv6 is utilized.
 However, in order to save energy, the headers of IPv6 packets are heavily compressed in 6LoWPAN.
 
-There are some proposals for specialized security measures in this stack, e.g. \textit{Adaptive Key Establishment Scheme (AKES)}, \cite{krentz15akes}.
+There are some proposals for specialized security measures in this stack, e.g. AKES, \cite{krentz15akes}.
 AKES makes use of session keys and a neighborhood-exploration-technique to gain a sufficient security level while being memory saving.
 Security is even obtained after reboots of motes, but it relies on predistributed keys on each mote.
 
@@ -189,8 +189,7 @@ The time between two measurements will probably not be equal to $T$, because the
 As long as \textit{bright} and \textit{dark} values are part of the $n$ measurements, the concrete time does not matter.
 After reading $n$ values, the mote calculates reasonable numeric values for \textit{bright} and \textit{dark}.
 For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm, see Section~\ref{ssub:contiki_process}.
-After that, the mote is able to classify new light values.
-In other words, it can read bits.
+After that, the mote is able to classify new light values and thus can read bits.
 
 \subsection{Synchronization}
 \label{sub:synchronization}
@@ -220,19 +219,19 @@ However, the actual implementation slightly differs from that figure, see Sectio
 \subsection{Initialization}
 \label{sub:initialization}
 
-The target of the initialization phase is to tell the mote, when the actual data starts.
+The target of the initialization phase is to tell the mote when the actual data starts.
 The communication between the mote and the phone is one-way.
-That means, the mote cannot communicate with the Android app.
-Therefore, the app has to guess, when the mote has successfully done calibration and synchronization.
-This can either be done by using a fixed time (let's say the app stays in calibration and synchronization phase for 10 seconds), or by user interaction (the user presses a button, when the mote indicates that it's ready).
+That means, the mote cannot communicate with the Android application.
+Therefore, the application has to guess when the mote has successfully done calibration and synchronization.
+This can either be done by using a fixed time (e.g. the application stays in calibration and synchronization phase for 10 seconds), or by user interaction (the user presses a button, when the mote indicates that it is ready via an LED).
 
-When the phone reaches the initialization phase as a result of one of those methods, it sends a pre-defined initialization pattern.
-The pattern must be different from 0101... and needs to have a length of one binary encoded character, e.g. 8 bit for ASCII encoding.
+When the phone reaches the initialization phase as a result of one of those methods, it sends a predefined initialization pattern.
+The pattern must be different from $0101...$ and needs to have a length of one binary encoded character, e.g. 8~bit for ASCII encoding.
 It sends the pattern exactly once, then it proceeds to the next phase.
 
 After successful synchronization, the mote waits for the initialization pattern.
-It does that by reading single bits and comparing the last 8 bits (for ASCII encoding) to the pre-defined pattern.
-Once the init pattern has been detected, the mote immediately switches to the data sending phase.
+It does that by reading single bits and comparing the last 8~bits (for ASCII encoding) to the predefined pattern.
+Once the initialization pattern has been detected, the mote immediately switches to the data sending phase.
 
 \subsection{Data sending}
 \label{sub:data_sending}
@@ -240,7 +239,7 @@ Once the init pattern has been detected, the mote immediately switches to the da
 In the data sending phase, we can finally transmit the data packet.
 As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase~\ref{sub:validation}.
 
-The Android app encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum using a pre-defined checksum algorithm.
+The Android application encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum using a predefined checksum algorithm.
 It is obvious, that those calculations can be done beforehand.
 The concatenated bit string then is sent using flashing of the display or the flash light.
 
@@ -269,7 +268,7 @@ It is not clear, whether the data workload was transmitted correctly and therefo
 \section{Implementation}
 \label{sec:implementation}
 
-Project Light consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
+The implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
 All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -277,7 +276,7 @@ All data that is being sent is encoded using a \textit{Hamming(8,4)-code} so tha
 The \textit{CRC32} is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
 This could be caused by 3-or-more-bit errors that the Hamming-code failed to detect.
 
-As the android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
+As the Android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
 It is at the very end of a period to maximize error avoidance due to timer delays\footnote{The Contiki timer that triggers the reading of the bit is a real-time timer.}.
 
 In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
@@ -323,7 +322,7 @@ For the mote to securely communicate, the link layer needs to be initialized usi
 The \textit{light process} implements the receiving side of the communication protocol.
 A real-time timer called \textit{rtimer}, which is offered by the Contiki operating system, eliminates timer inaccuracies on the mote side.
 The mote uses its light sensor to sense the current brightness.
-Once the process is started, an LED-countdown (red -> blue -> green) indicates the start of the key initialization procedure.
+Once the process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key initialization procedure.
 A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(\ref{sub:calibration}).
 Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
 After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
@@ -365,10 +364,10 @@ While the \textit{A3} transmits reliably with a period length of 15ms, the \text
 One reason for that could be that the \textit{A3} is considerably newer compared to the \textit{S2}.
 
 We also tested the transmission reliability with a \textit{Motorola MotoG (2nd generation)} and an \textit{LG Nexus 5}.
-Both showed very poor performance at arbitrary period lengths and we are not shure why.
-One possible explanation is, that the CPU of those phones is saving energy too aggressively.
+Both showed very poor performance at arbitrary period lengths.
+One possible explanation for this is, that the CPU of those phones is saving energy too aggressively.
 This effect was already seen in \cite{mongia2010reliable}.
-Maybe different phone model are affected differently by that.
+Different phone model may be affected differently by that.
 
 \begin{figure}
 	\centering
@@ -377,14 +376,14 @@ Maybe different phone model are affected differently by that.
 	\label{fig:successful_transmissions}
 \end{figure}
 
-Another thing to think about is the usefulness of the \textit{Hamming(8,4)-code}.
+Another subject of debate is the \textit{Hamming(8,4)-code}.
 While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent.
-When analyzing the number of corrected bits depending on the transmission rate, it behaves as follows:
+When analyzing the number of corrected bits depending on the transmission rate, the following ca be shown:
 With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
 When accelerating the transmission, there is a point where many bits are corrected, but the transmission normally succeeds.
 If the transmission speed is then set even higher, the whole transmission fails most of the time due to irrecoverable errors.
-These points are 15ms for the \textit{A3} and 63ms for the \textit{S2} (see Figure~\ref{fig:successful_transmissions}).
-When we want to achieve the transmission speed of the \textit{A3} with 15ms, we can either use the 15ms and Hamming encoding to correct the bits, or we can halve the amount of data by deactivating the Hamming encoding and transmit with 31ms\footnote{The values are rounded, that's why the half of 31 is 15.}.
+The borders are 15ms for the \textit{A3} and 63ms for the \textit{S2} (see Figure~\ref{fig:successful_transmissions}).
+When we want to achieve the transmission speed of the \textit{A3} with 15ms, we can either use the 15ms and Hamming encoding to correct the bits, or we can halve the amount of data by deactivating the Hamming encoding and transmit with 31ms per bit\footnote{The values are rounded, that is why the half of 31 is 15.}.
 So the transmission takes the same time, but actually increases the percentage of successful transmissions.
 Errors can still be detected afterwards using the \textit{CRC32} checksum.
 Therefore, the \textit{Hamming(8,4)-code} is not useful in that case.
@@ -402,16 +401,16 @@ Future work should target the further automation of the presented process, e.g. 
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
 To simplify the initialization of several motes at once, two things need to be done.
-First, the app should stay in calibration and synchronization phase, until the user presses a button.
+First, the application should stay in calibration and synchronization phase, until the user presses a button.
 Second, the mote should indicate via an LED that it reached the initialization phase~(\ref{sub:initialization}).
 With those two concepts, the key transmission to several motes could work as follows:
 The user lays out all motes in a grid next to each other.
-Then the phone is placed on top of them and the app is started.
+Then the phone is placed on top of them and the application is started.
 All motes are placed, so that they receive the flickering of the flash light.
 The motes are started one after another.
 Once the motes are running, the user waits for all of them to indicate via an LED, that they reached the initialization phase.
 They are now all waiting for the initialization pattern.
-The user presses a button in the app and the phone sends the initialization pattern followed by the data packet.
+The user presses a button in the application and the phone sends the initialization pattern followed by the data packet.
 When the transmission is over, the user can see via a red LED which motes failed to receive the data correctly.
 The process needs to be restarted with those motes.
 However, this is not implemented and tested yet and could be part of future projects.
