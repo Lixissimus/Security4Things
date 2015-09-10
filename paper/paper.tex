@@ -49,9 +49,11 @@ Konrad-Felix Krentz\\
 \maketitle
 
 \begin{abstract}
-The rise of the Internet of Things (IoT) is associated with an enourmous increase in every-day devices that get connected to the Internet.
+The rise of the Internet of Things (IoT) is associated with an enormous increase in every-day devices that get connected to the Internet.
 In order to avoid privacy issues and security threats those devices have to communicate securely using state-of-the-art encryption techniques.
-The initial keying material needed for this cannot be created on those devices itself due to memory and power constraints.
+However, these techniques often rely on predistributed keying material.
+Secure distribution of these initial keys \textit{before} securing techniques are operational remains a major problem.
+
 We propose a secure method for IoT-device initialization by transmitting initial keying material via light.
 The transmission can be executed using an off-the-shelf smart phone and doesn't require any technical expertise.
 \end{abstract}
@@ -376,7 +378,7 @@ Maybe different phone model are affected differently by that.
 \end{figure}
 
 Another thing to think about is the usefulness of the \textit{Hamming(8,4)-code}.
-While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent. 
+While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent.
 When analyzing the number of corrected bits depending on the transmission rate, it behaves as follows:
 With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
 When accelerating the transmission, there is a point where many bits are corrected, but the transmission normally succeeds.
