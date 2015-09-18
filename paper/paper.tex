@@ -57,7 +57,7 @@ However, these techniques often rely on predistributed keying material.
 Secure distribution of these initial keys \textit{before} securing techniques are operational remains a major problem.
 
 We propose a secure method for IoT-device initialization by transmitting initial keying material via light.
-The transmission can be executed using an off-the-shelf smart phone and doesn't require any technical expertise.
+The transmission can be executed using an off-the-shelf smartphone and doesn't require any technical expertise.
 \end{abstract}
 
 \category{K.6.5}{Management Of Computing And Information Systems}{Security}
@@ -72,7 +72,7 @@ The transmission can be executed using an off-the-shelf smart phone and doesn't 
 The Internet of Things (IoT) is becoming more and more of a reality every day.
 It consists of small devices (called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
 They work together, allowing monitoring and controlling of several kinds of real-world systems.
-An example are motes collecting information about parking lot occupancy, allowing car drivers to find free spaces using their smart phones\footnote{see http://www.streetline.com/}.
+An example are motes collecting information about parking lot occupancy, allowing car drivers to find free spaces using their smartphones\footnote{see http://www.streetline.com/}.
 
 In the last decades, the rise of embedded systems changed daily lives.
 However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
@@ -88,7 +88,7 @@ This is a major problem, because typical motes lack input/output devices which a
 \begin{figure}
 	\centering
 	\includegraphics[scale=.4]{images/overview.png}
-	\caption{Transmission of keying material with light: \textbf{a)} enter and encode key and parameters on smart phone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist key and parameters, \textbf{d)} communicate securely via the public Internet }
+	\caption{Transmission of keying material with light: \textbf{a)} enter and encode key and parameters on smartphone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist key and parameters, \textbf{d)} communicate securely via the public Internet }
 	\label{fig:overview}
 \end{figure}
 
@@ -102,7 +102,7 @@ Anyway, pre-initialization requires somebody other than the user/installer to kn
 This paper proposes an alternative way, which is transmitting initial keying material via light.
 It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
-As visible in Figure~\ref{fig:overview}, the user utilizes a smart phone application to enter, encode and emit keying material using the flash light of the phone.
+As visible in Figure~\ref{fig:overview}, the user utilizes a smartphone application to enter, encode and emit keying material using the flash light of the phone.
 The mote receives the message via a light sensor and reconstructs the keys.
 After successful initialization and verification, the mote saves the keying material permanently.
 On subsequent reboots, it is read from memory and immediately usable without any further action required.
@@ -113,14 +113,14 @@ The physics of light is well understood by non-technical people, in contrast to 
 Thus, leaking of the wirelessly sent secrets is less likely.
 Moreover, multiple devices could be initialized concurrently by just placing them next to each other.
 
-We implemented a prototype for an Android smart phone and a mote running the Contiki OS, \cite{dunkels04contiki}.
+We implemented a prototype for an Android smartphone and a mote running the Contiki OS, \cite{dunkels04contiki}.
 Contiki is an open source, state-of-the-art operating system for IoT devices\footnote{http://www.contiki-os.org/}.
 We also tested some techniques to make the transmission error-prone.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
 The remainder of the paper is structured as follows:
 Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key initialization.
-In section~\ref{sec:communication_protocol}, we propose our protocol for the smart phone and the mote to communicate via light.
+In section~\ref{sec:communication_protocol}, we propose our protocol for the smartphone and the mote to communicate via light.
 Details of our implementations are presented in section~\ref{sec:implementation}, both for the emitting~(sec.~\ref{sub:android_app}) and the receiving~(sec.~\ref{sub:mote}) parts.
 In section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and its limits.
 We conclude our work and give an outlook on what could be done next in section~\ref{sec:future_work}.
@@ -148,7 +148,7 @@ There are multiple approaches to solve this by securing the radio channel in som
 \begin{itemize}
 	\item \cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC). However, while meeting high security standards, software implementations of ECC require a lot of memory and energy while hardware implementations increase the per-unit cost.
 	\item In order to secure radio communication, \cite{kuo2007message} utilizes a Faraday cage in which a batch of motes can be programmed without interleaving of messages from an attacker outside of the cage. Additionally, another device outside of the cave jams radio waves to prevent malicious communication.
-	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled device like a smart phone, \cite{krentz20156doku}. The smart phone needs extra hardware attached to communicate with the mote via radio waves. It relies on interaction with the end-user as he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
+	\item \textit{6doku} is a protocol for pairing  a mote with a touch-enabled device like a smartphone, \cite{krentz20156doku}. The smartphone needs extra hardware attached to communicate with the mote via radio waves. It relies on interaction with the end-user as he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
 \end{itemize}
 
 There are also some proposals for key predistribution using an alternative channel, i.e. light.
@@ -163,11 +163,11 @@ The communication via light can be either way: if the connector receives light f
 It is shown, that key provisioning is both faster and easier for end users.
 
 \cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
-Instead of specialized hardware which end users might not want to buy, they provide a smart phone application which provisions a mote.
-Assuming most users who install IoT setups already own a smart phone, this seems to be a cost-effective alternative.
+Instead of specialized hardware which end users might not want to buy, they provide a smartphone application which provisions a mote.
+Assuming most users who install IoT setups already own a smartphone, this seems to be a cost-effective alternative.
 
 However, we could not find that this approach is examined scientifically.
-Thus, we propose a protocol for secure and wireless key predistribution using a smart phone as a light emitter and motes with a light sensor as receivers.
+Thus, we propose a protocol for secure and wireless key predistribution using a smartphone as a light emitter and motes with a light sensor as receivers.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
@@ -288,8 +288,8 @@ In the following sections, both the implementation of the Android application an
 
 We have developed two different versions of the Android application for users to enter keys and transmit them.
 
-The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smart phone using Apache~Cordova\footnote{https://cordova.apache.org/}.
-Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smart phone operating systems, too, e.g. iOS or Windows Phone.
+The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smartphone using Apache~Cordova\footnote{https://cordova.apache.org/}.
+Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smartphone operating systems, too, e.g. iOS or Windows Phone.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
 The flash light cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
@@ -307,7 +307,7 @@ Still on Android, it is impossible to guarantee real-time behavior, but we may g
 The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
 Another advantage of this version is the flash light.
-Depending on the smart phone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
+Depending on the smartphone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
 Especially when attempting to program multiple motes at once this comes in very handy.
 
 
