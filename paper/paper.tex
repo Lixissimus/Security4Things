@@ -308,7 +308,9 @@ Furthermore the timing accuracy was considerably limited by the overhead caused 
 
 To improve transmission reliability we therefore built a native Android application written in Java.
 Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
-The Java implementation also benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
+As to bee seen in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
+This is just a prove of concept, a real key should be a random 128~bit string which needs to be generated and saved for later usage, which is out of scope of this paper.
+This Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
 Another advantage of this version is the flash light.
 Depending on the smartphone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
