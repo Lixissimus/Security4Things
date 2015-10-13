@@ -18,7 +18,7 @@
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
 
-\bibliographystyle{acm}
+% \bibliographystyle{abbrv}
 
 \hyphenation{Ham-ming}
 
@@ -55,11 +55,11 @@ Konrad-Felix Krentz\\
 \begin{abstract}
 The rise of the Internet of Things (IoT) is associated with an enormous increase in every-day devices that get connected to the Internet.
 In order to avoid privacy issues and security threats those devices have to communicate securely using state-of-the-art encryption techniques.
-However, these techniques often rely on predistributed keying material.
-Secure distribution of these initial keys \textit{before} securing techniques are operational remains a major problem.
+However, these techniques often rely on predistributed key material.
+The secure and user-friendly provisioning of the initial key meterial \textit{before} securing techniques are operational remains a major problem.
 
-We propose a secure method for IoT-device initialization by transmitting initial keying material via light.
-The transmission can be executed using an off-the-shelf smartphone and doesn't require any technical expertise.
+We propose a secure method for provisioning keys for IoT-devices via light.
+The transmission can be executed using an off-the-shelf smartphone and does not require any technical expertise.
 \end{abstract}
 
 \category{K.6.5}{Management Of Computing And Information Systems}{Security}
@@ -72,21 +72,16 @@ The transmission can be executed using an off-the-shelf smartphone and doesn't r
 \label{sec:introduction}
 
 The Internet of Things (IoT) is becoming more and more of a reality every day.
-It consists of small devices (called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
+It consists of small devices (henceforth called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
 They work together, allowing monitoring and controlling of several kinds of real-world systems.
 An example are motes collecting information about parking lot occupancy, allowing car drivers to find free spaces using their smartphones\footnote{see http://www.streetline.com/}.
 
-In the last decades, the rise of embedded systems changed daily lives.
-However, these systems often had limited networking capabilities or at least used their own, proprietary and thus unaccessible network technology.
-Because of the huge variety of valuable possibilities, the impact of embedded systems will be advanced even further within the IoT.
-
-However, this comes at a price: by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
-New security measures had to be developed and implemented to react to this.
+However, by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
+New security measures were developed and implemented to react to this.
 For example, \textit{Adaptive Key Establishment Scheme (AKES)} provides adaptable security measures for being used with the IEEE~802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
-Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be initialized with keying material and parameters.
-This is a major problem, because typical motes lack input/output devices which are securely usable without configured networking.
+Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be provisioned with keying material and parameters.
+This is a major problem, because typical motes lack input/output devices that are securely usable without configured networking.
 
-% figure is inserted here to be shown on page 1
 \begin{figure}
 	\centering
 	\includegraphics[scale=.4]{images/overview.png}
@@ -94,14 +89,14 @@ This is a major problem, because typical motes lack input/output devices which a
 	\label{fig:overview}
 \end{figure}
 
-One possibility is to plug a wire to each and every node in order to initialize it.
+One method is to plug a wire to each and every node in order to initialize it.
 However, there are two downsides: First, a typical IoT setup consists of too many devices for plugging to be a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
 
-Another approach is to pre-initialize the keys in the factory.
+Another approach is to pre-install the keys in the factory.
 This would mean that either there is a small set of assigned keys, which would lead to possible brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be affordable in great numbers.}.
 Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
 
-This paper proposes an alternative way, which is transmitting initial keying material via light.
+This paper proposes an alternative method, which is transmitting initial keying material via light.
 It is mainly targeted on private users without technical background and should provide them with a simple though secure process for initializing.
 
 As visible in Figure~\ref{fig:overview}, the user utilizes a smartphone application to enter, encode and emit keying material using the flash light of the phone.
@@ -427,7 +422,8 @@ The process needs to be restarted with those motes.
 However, this is not implemented and tested yet and could be part of future projects.
 
 % Bibliography
-\bibliographystyle{ACM-Reference-Format-Journals}
+% \bibliographystyle{ACM-Reference-Format-Journals}
+\bibliographystyle{abbrv}
 \bibliography{paper}
 
 \end{document}
