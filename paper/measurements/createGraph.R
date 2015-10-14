@@ -1,11 +1,12 @@
 data = read.csv("data.csv", head=TRUE)
-barchart(fails~speed,
+barchart(success~speed,
          data=data,
          groups=phone,
-         col=c("lightgray","black"),
+         col=c("lightgray","darkgray"),
          horiz=FALSE,
-         main="Failing transmissions",
+         main="Successful transmissions",
          xlim=c("7","15","31","63"),
          xlab="Period length in ms",
-         ylab="Number of failed transmissions"
+         ylab="Percent of successful transmissions",
+         legend=c("s2","a3")
 )

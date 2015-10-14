@@ -140,44 +140,44 @@ It relies on interaction with the end-user as he needs to check if blinking on t
 
 There are also some proposals for key predistribution using an alternative channel, i.e. light:
 
-\cite{saxena2009blink} proposes to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
+\cite{saxena2009blink} proposed to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
 They are verified afterwards using the unidirectional light channel from the motes to the sink.
 However, they still rely on energy consuming asymmetric encryption.
 
 \textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote, \cite{doan2012lidsn}.
 Therefore, a temporal key for radio communication is transmitted to a specialized \textit{connector} via light.
-The communication via light can be either way: if the connector receives light from the motes LED, it reads it. If the mote has no LED, a light sensor is assumed and the connector emits light with an own LED.
-It is shown, that key provisioning is both faster and easier for end users.
+The communication via light can be either way: if the connector receives light from a mote's LED, it reads it. 
+If the mote has no LED, a light sensor is assumed and the connector emits light with an own LED.
+They showed, that key provisioning is both faster and easier for end users.
 
 \cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
 Instead of specialized hardware which end users might not want to buy, they provide a smartphone application which provisions a mote.
 Assuming most users who install IoT setups already own a smartphone, this seems to be a cost-effective alternative.
 
-However, we could not find that this approach is examined scientifically.
-Thus, we propose a protocol for secure and wireless key predistribution using a smartphone as a light emitter and motes with a light sensor as receivers.
+However, we could not find that this approach was examined scientifically.
+We address this and propose a protocol for secure and wireless key provisioning using a smartphone as a light emitter and motes with light sensors as receivers.
 
 \section{Communication Protocol}
 \label{sec:communication_protocol}
 
-In the following section, we describe the phases of the protocol.
-Each phase contains the necessary steps for the Android device and the mote.
+In the following, we describe the phases of the protocol.
+Each phase contains the necessary steps for the smartphone and the mote.
 Insights into the concrete implementation will be given in Section~\ref{sec:implementation}.
 
 \subsection{Calibration}
 \label{sub:calibration}
 
 The goal of the calibration phase is to establish light values for \textit{bright} and \textit{dark} on the mote.
-By doing this in the beginning of the protocol, we can adapt to different lighting situations in the room and different brightness levels of the phone.
+By doing this at the beginning of the protocol, we can adapt to different lighting situations in the room and different brightness levels of the smartphone.
 
-The task of the phone in this protocol stage is simple.
-It periodically sends \textit{bright} and \textit{dark} values, each with a certain period length $T$.
-Simply said, it is blinking.
+The task of the smartphone in this protocol stage is to periodically send \textit{bright} and \textit{dark} values, each with a certain period length $T$.
+Simply said, it is blinking by flashing of the display or the flash light.
 
 The mote on the other side measures $n$ light values using its light sensor.
 The time between two measurements will probably not be equal to $T$, because the period length is unknown to the mote at this point.
 As long as \textit{bright} and \textit{dark} values are part of the $n$ measurements, the concrete time does not matter.
 After reading $n$ values, the mote calculates reasonable numeric values for \textit{bright} and \textit{dark}.
-For instance, this can be achieved by applying a \mbox{\textit{2-means}} algorithm, see Section~\ref{ssub:contiki_process}.
+This is achieved by applying the \mbox{\textit{2-means}} algorithm.
 After that, the mote is able to classify new light values and thus can read bits.
 
 \subsection{Synchronization}
@@ -216,7 +216,7 @@ This can either be done by using a fixed time (e.g. the application stays in cal
 
 When the phone reaches the initialization phase as a result of one of those methods, it sends a predefined initialization pattern.
 The pattern must be different from $0101...$ and needs to have a length of one binary encoded character, e.g. 8~bit for ASCII encoding.
-It sends the pattern exactly once, then it proceeds to the next phase.
+It sends the pattern exactly once, then it proceeds with the next phase.
 
 After successful synchronization, the mote waits for the initialization pattern.
 It does that by reading single bits and comparing the last 8~bits (for ASCII encoding) to the predefined pattern.
@@ -226,16 +226,18 @@ Once the initialization pattern has been detected, the mote immediately switches
 \label{sub:data_sending}
 
 In the data sending phase, we can finally transmit the data packet.
-As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase~\ref{sub:validation}.
+As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase (Section~\ref{sub:validation}).
 
-The Android application encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum using a predefined checksum algorithm.
-It is obvious, that those calculations can be done beforehand.
-The concatenated bit string then is sent using flashing of the display or the flash light.
+The smartphone encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum.
+All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
+\textit{CRC32} is chosen as the checksum algorithm to avoid saving erroneous key material.
+This could be caused by 3-or-more-bit errors that the Hamming code failed to detect.
+The concatenated bit string is then sent using flashing of the display or the flash light.
 
 The mote, after having recognized the initialization pattern, reads blocks of bits.
 The first 4 byte are interpreted as the length of the actual data.
-Afterwards, it reads the appropriate number of blocks to receive the data workload.
-Once the whole data workload is read, it interprets the last 4 byte as the checksum.
+Afterwards, it reads the appropriate number of blocks to receive the data payload.
+Once the whole data payload is read, it interprets the last 4 byte as the checksum.
 
 \begin{figure}
 	\centering
@@ -249,75 +251,69 @@ Once the whole data workload is read, it interprets the last 4 byte as the check
 
 In this last phase, the mote checks whether the transmission was successful.
 The phone does nothing in this phase, it has successfully run the protocol.
-The mote uses the received data workload and calculates the checksum by itself.
+The mote uses the received data payload and calculates the checksum by itself.
 If it is equal to the received one, the data packet is considered to be transmitted correctly.
 If both checksums differ, something must have gone wrong.
-It is not clear, whether the data workload was transmitted correctly and therefore the mote goes into an error state.
+It is not clear, whether the data payload was transmitted correctly and therefore the mote goes into an error state.
 
 \section{Implementation}
 \label{sec:implementation}
 
-The implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on the TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
+Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
-All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
-
-The \textit{CRC32} is chosen as the checksum algorithm for the validation phase to avoid saving erroneous key material.
-This could be caused by 3-or-more-bit errors that the Hamming code failed to detect.
-
-As the Android timer that triggers the bit emission cannot be too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
-It is at the very end of a period to maximize error avoidance due to timer delays\footnote{The Contiki timer that triggers the reading of the bit is a real-time timer.}.
 
 In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
 
 \subsection{Android app}
 \label{sub:android_app}
 
-We have developed two different versions of the Android application for users to enter keys and transmit them.
-
+We have developed two different versions of the Android application, which enable users to enter keys and transmit them.
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smartphone using Apache~Cordova\footnote{https://cordova.apache.org/}.
 Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smartphone operating systems, too, e.g. iOS or Windows Phone.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
 The flash light cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
-Furthermore the timing accuracy was considerably limited by the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
+Furthermore the timing accuracy was considerably limited due to the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
 
 \begin{figure}
 	\centering
 	\includegraphics[scale=.15]{images/screen_native.png}
-	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. Any text entered in the text field can be transmitted by tapping on ``Start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
+	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. For demonstration purposes, any text entered in the text field can be transmitted by tapping on ``Start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
 	\label{fig:screenshot}
 \end{figure}
 
-To improve transmission reliability we therefore built a native Android application written in Java.
-Still on Android, it is impossible to guarantee real-time behavior, but we may get smaller delays without JavaScript involved.
+To improve transmission reliability, we therefore built a native Android application written in Java.
+Still, on Android, it is impossible to guarantee real-time behavior, but we get smaller delays without JavaScript involved.
 As to bee seen in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
 This is just a prove of concept, a real key should be a random 128~bit string which needs to be generated and saved for later usage, which is out of scope of this paper.
 This Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
-In that way, the phone and the mote do not get out of sync, no matter how long the transmission takes.
+In effect, the smartphone and the mote do not get out of sync, no matter how long the transmission takes.
 Another advantage of this version is the flash light.
 Depending on the smartphone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
 Especially when attempting to program multiple motes at once this comes in very handy.
 
 
-\subsection{Mote}
+\subsection{Integration into Contiki}
 \label{sub:mote}
 
 The implementation on the mote is divided into two parts.
-The communication protocol and key storage is implemented in a Contiki process.
-For the mote to securely communicate, the link layer needs to be initialized using the transmitted key, which is accomplished by a link layer driver wrapper.
+First, the communication protocol and key storage is implemented in a Contiki process.
+Second, for the mote to securely communicate, the implementation of link layer security needs to be initialized using the transmitted key.
+This is accomplished by a link layer driver wrapper around link layer security.
 
 \subsubsection{Contiki process}
 \label{ssub:contiki_process}
 
 The \textit{light process} implements the receiving side of the communication protocol.
 A real-time timer called \textit{rtimer}, which is offered by the Contiki operating system, eliminates timer inaccuracies on the mote side.
+As the Android timer that triggers the bit emission is never too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
+It is at the very end of a period to maximize error avoidance due to timer delays.
 The mote uses its light sensor to sense the current brightness.
-Once the process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key initialization procedure.
-A \mbox{\textit{2-means}} algorithm is used to create two clusters of \textit{bright} and \textit{dark} values and to compute their mean values~(see \ref{sub:calibration}).
-Subsequently a new value is classified as \textit{0} or \textit{1} depending on which mean value is closer to it.
+
+Once the light process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key initialization procedure.
 After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
-If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the failure and the process should be restarted.
+If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the error and the process should be restarted.
 A green LED shows that the key material has been received successfully and was saved to the permanent flash memory of the mote.
 
 \subsubsection{Contiki driver wrapper}
