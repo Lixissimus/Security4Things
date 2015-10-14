@@ -55,8 +55,8 @@ Konrad-Felix Krentz\\
 \begin{abstract}
 The rise of the Internet of Things (IoT) is associated with an enormous increase in every-day devices that get connected to the Internet.
 In order to avoid privacy issues and security threats those devices have to communicate securely using state-of-the-art encryption techniques.
-However, these techniques often rely on predistributed key material.
-The secure and user-friendly provisioning of the initial key meterial \textit{before} securing techniques are operational remains a major problem.
+However, these techniques often rely on predistributed keying material.
+The secure and user-friendly provisioning of the initial keying material \textit{before} securing techniques are operational remains a major problem.
 
 We propose a secure method for provisioning keys for IoT-devices via light.
 The transmission can be executed using an off-the-shelf smartphone and does not require any technical expertise.
@@ -98,7 +98,7 @@ Anyway, pre-initialization requires somebody other than the user/installer to kn
 
 This paper proposes an alternative method, which is transmitting initial keying material via light.
 Our method mainly targets private users without technical background.
-As visible in Figure~\ref{fig:overview}, the user utilizes a smartphone application to enter, encode and emit keying material using the flash light of the phone.
+As visible in Figure~\ref{fig:overview}, the user utilizes a smartphone application to enter, encode and emit keying material using the flashlight of the phone.
 The mote receives the message via a light sensor and reconstructs the keys.
 After successful initialization and verification, the mote saves the keying material permanently.
 On subsequent reboots, it is read from memory and immediately usable without any further action required.
@@ -230,9 +230,9 @@ As we can see in Figure~\ref{fig:data_packet}, the packet contains the data leng
 
 The smartphone encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum.
 All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
-\textit{CRC32} is chosen as the checksum algorithm to avoid saving erroneous key material.
+\textit{CRC32} is chosen as the checksum algorithm to avoid saving erroneous keying material.
 This could be caused by 3-or-more-bit errors that the Hamming code failed to detect.
-The concatenated bit string is then sent using flashing of the display or the flash light.
+The concatenated bit string is then sent using flashing of the display or the flashlight.
 
 The mote, after having recognized the initialization pattern, reads blocks of bits.
 The first 4 byte are interpreted as the length of the actual data.
@@ -262,7 +262,6 @@ It is not clear, whether the data payload was transmitted correctly and therefor
 Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
 
-
 In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
 
 \subsection{Android app}
@@ -272,7 +271,7 @@ We have developed two different versions of the Android application, which enabl
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smartphone using Apache~Cordova\footnote{https://cordova.apache.org/}.
 Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smartphone operating systems, too, e.g. iOS or Windows Phone.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
-The flash light cannot be controlled reliably using the mentioned web technologies.
+The flashlight cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
 Furthermore the timing accuracy was considerably limited due to the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
 
@@ -289,8 +288,8 @@ As to bee seen in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-enco
 This is just a prove of concept, a real key should be a random 128~bit string which needs to be generated and saved for later usage, which is out of scope of this paper.
 This Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In effect, the smartphone and the mote do not get out of sync, no matter how long the transmission takes.
-Another advantage of this version is the flash light.
-Depending on the smartphone model, the flash light is as fast as screen flickering even for small bit lengths, while being much brighter.
+Another advantage of this version is the flashlight.
+Depending on the smartphone model, the flashlight is as fast as screen flickering even for small bit lengths, while being much brighter.
 Especially when attempting to program multiple motes at once this comes in very handy.
 
 
@@ -311,28 +310,26 @@ As the Android timer that triggers the bit emission is never too early but in fa
 It is at the very end of a period to maximize error avoidance due to timer delays.
 The mote uses its light sensor to sense the current brightness.
 
-Once the light process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key initialization procedure.
+Once the light process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key provisioning procedure.
 After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the error and the process should be restarted.
-A green LED shows that the key material has been received successfully and was saved to the permanent flash memory of the mote.
+A green LED shows that the keying material has been received successfully and was saved to the permanent flash memory of the mote.
 
-\subsubsection{Contiki driver wrapper}
+\subsubsection{Wrapper}
 \label{ssub:contiki_driver_wrapper}
 
-For the mote to actually use the key material that was transmitted, the initialization of the link layer security needs to be delayed until the key transmission finished successfully.
+For the mote to actually use the keying material that was transmitted, the initialization of the link layer security needs to be delayed until the transmission finished successfully.
 To do so we created a link layer driver wrapper that accomplishes the following things:
 
 \begin{enumerate}
-	\item Delay all calls to the link layer driver.
-	\item Check whether the key material was initialized before.
-	\item If not, start the \textit{light process} and wait for successful key transmission.
-	\item Initialize the link layer using the transmitted key material.
+	\item Delay all calls to the link layer driver if the mote was not provisioned with keying material before.
+	\item Start the \textit{light process} and wait for successful transmission.
+	\item Initialize the link layer using the transmitted keying material.
 	\item Forward all calls to the link layer driver.
 \end{enumerate}
 
-Calls to the driver that are being issued before the key material initialization are actually being canceled right now, but should eventually just be delayed and reissued once the initialization has finished.
 Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper.
-On the first start of the mote the key initialization via the \textit{light process} is triggered whereas during later starts the mote recognizes that its key material has been initialized before.
+At the first start of the mote, the keying material initialization via the \textit{light process} is triggered whereas during later starts the mote recognizes that its keying material has been initialized before.
 
 
 \section{Results and Discussion}
@@ -355,6 +352,7 @@ Both showed very poor performance at arbitrary period lengths.
 One possible explanation for this is, that the CPU of those phones is saving energy too aggressively.
 This effect was already seen in \cite{mongia2010reliable}.
 Different phone models seem to be affected differently by that.
+The flashlight of the \textit{LG Nexus 5} could not be used at all for transmission as it is only capable to flash around two times per second.
 
 \begin{figure}
 	\centering
@@ -381,19 +379,20 @@ Therefore, the \textit{Hamming(8,4)-code} is not useful in that case.
 \label{sec:future_work}
 
 In this paper, we presented a secure method for IoT-device initialization by transmitting initial keying material via light.
-It is mainly targeted at private users and can easily be executed having no technical background at all.
-As the visibility of light can be judged and restricted pretty well by end users, safety from interception is given.
+It mainly targets private users and can easily be executed having no technical background at all.
+As the visibility of light can be judged and restricted pretty well by end users, security against interception is given.
+A challenge is that transmission reliability is heavily affected by the smartphone model that is used to provision the keying material.
 
-Future work should target the further automation of the presented process, e.g. by establishing a bidirectional communication.
+Future work should target the further automation of the presented method, e.g. by establishing a bidirectional communication.
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
 To simplify the initialization of several motes at once, two things need to be done.
 First, the Android application should stay in calibration and synchronization phase, until the user presses a button.
-Second, the mote should indicate via an LED that it reached the initialization phase~(see \ref{sub:initialization}).
-With those two concepts, the key transmission to several motes could work as follows:
+Second, each mote should indicate via an LED that it reached the initialization phase.
+With those two concepts, the key provisioning to several motes could work as follows:
 The user lays out all motes in a grid next to each other.
-Then the phone is placed on top of them and the app is started.
-All motes are placed, so that they receive the flickering of the flash light.
+Then the user holds the smartphone on top of them and starts the app.
+All motes are placed, so that they receive the flickering of the flashlight.
 The motes are started one after another.
 Once the motes are running, the user waits for all of them to indicate via an LED, that they reached the initialization phase.
 They are now all waiting for the initialization pattern.
