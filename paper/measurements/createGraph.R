@@ -1,3 +1,5 @@
+library(lattice)
+
 data = read.csv("data.csv", head=TRUE)
 barchart(success~speed,
          data=data,
@@ -7,6 +9,5 @@ barchart(success~speed,
          main="Successful transmissions",
          xlim=c("7","15","31","63"),
          xlab="Period length in ms",
-         ylab="Percent of successful transmissions",
-         legend=c("s2","a3")
+         ylab="Percent of successful transmissions"
 )
