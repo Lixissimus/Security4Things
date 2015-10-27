@@ -22,6 +22,17 @@
 
 \hyphenation{Ham-ming}
 
+\usepackage{balance}
+
+
+\def\pprw{8.5in}
+\def\pprh{11in}
+\special{papersize=\pprw,\pprh}
+\setlength{\paperwidth}{\pprw}
+\setlength{\paperheight}{\pprh}
+\setlength{\pdfpagewidth}{\pprw}
+\setlength{\pdfpageheight}{\pprh}
+
 \begin{document}
 
 \title{Key Provisioning for the Internet of Things via Light}
@@ -49,7 +60,7 @@ Prof. Dr. Christoph Meinel\\
 Konrad-Felix Krentz\\
     \affaddr{\textit{Supervisor}}
 }
-
+\toappear{}
 \maketitle
 
 \begin{abstract}
@@ -58,7 +69,7 @@ In order to avoid privacy issues and security threats those devices have to comm
 However, these techniques often rely on predistributed keying material.
 The secure and user-friendly provisioning of the initial keying material \textit{before} securing techniques are operational remains a major problem.
 
-We propose a secure method for provisioning keys for IoT-devices via light.
+We propose a secure method for provisioning IoT-devices with keying material via light.
 The transmission can be executed using an off-the-shelf smartphone and does not require any technical expertise.
 \end{abstract}
 
@@ -85,7 +96,7 @@ This is a major problem, because typical motes lack input/output devices that ar
 \begin{figure}
 	\centering
 	\includegraphics[scale=.4]{images/overview.png}
-	\caption{Transmission of keying material with light: \textbf{a)} enter and encode key and parameters on smartphone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist key and parameters, \textbf{d)} communicate securely via the public Internet }
+	\caption{Transmission of keying material with light: \textbf{a)} enter enter keying material and parameters on a smartphone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist keying material and parameters, \textbf{d)} communicate securely via the public Internet }
 	\label{fig:overview}
 \end{figure}
 
@@ -93,14 +104,14 @@ One method is to plug a wire to each and every node in order to initialize it.
 However, there are two downsides: First, a typical IoT setup consists of too many devices for plugging to be a feasible solution. Second, in most installations, attackers may have physical access to motes, so jacks on the mote (e.g. JTAG) are a dangerous security threat.
 
 Another approach is to pre-install the keys in the factory.
-This would mean that either there is a small set of assigned keys, which would lead to possible brute-force attacks; or each mote gets an individual key, which requires a secure transmission and attribution of keys to motes\footnote{This would also increase cost of motes, but they need to be as cheap as possible in order to be affordable in great numbers.}.
-Anyway, pre-initialization requires somebody other than the user/installer to know the keys, which diminishes security.
+This would mean that either there is a small set of assigned keys, which is highly insecure, or each mote gets an individual key, which increases manufacturing costs.
+Anyway, pre-installation requires somebody other than the user/installer to know the keys, which diminishes security.
 
 This paper proposes an alternative method, which is transmitting initial keying material via light.
 Our method mainly targets private users without technical background.
 As visible in Figure~\ref{fig:overview}, the user utilizes a smartphone application to enter, encode and emit keying material using the flashlight of the phone.
-The mote receives the message via a light sensor and reconstructs the keys.
-After successful initialization and verification, the mote saves the keying material permanently.
+The mote receives the message via a light sensor and reconstructs the keying material.
+After successful transmission and verification, the mote saves the keying material permanently.
 On subsequent reboots, it is read from memory and immediately usable without any further action required.
 
 There are several advantages of this method.
@@ -115,7 +126,7 @@ We also tested techniques to make the transmission reliable.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
 The remainder of the paper is structured as follows:
-Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key initialization.
+Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key provisioning.
 In Section~\ref{sec:communication_protocol}, we propose our protocol for the smartphone and the mote to communicate via light.
 Details of our implementations are presented in Section~\ref{sec:implementation}, both for the emitting~(Section~\ref{sub:android_app}) and the receiving~(Section~\ref{sub:mote}) parts.
 In Section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and its limits.
@@ -196,7 +207,6 @@ After recording $m$ bit flips, it can calculate the average period length.
 With completion of the first two phases, the mote is now able to read data sent by the phone.
 It learned a decision threshold for decoding the bits and the period length to read values at the right time.
 Figure~\ref{fig:read_a_bit} shows how data can be read.
-However, the actual implementation slightly differs from that figure, see Section~\ref{sec:implementation}.
 
 \begin{figure}
 	\centering
@@ -225,8 +235,8 @@ Once the initialization pattern has been detected, the mote immediately switches
 \subsection{Data sending}
 \label{sub:data_sending}
 
-In the data sending phase, we can finally transmit the data packet.
-As we can see in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase (Section~\ref{sub:validation}).
+In the data sending phase, the smartphone finally transmits a data packet, which provisions the mote with keying material and parameters.
+As shown in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase (Section~\ref{sub:validation}).
 
 The smartphone encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum.
 All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -259,15 +269,14 @@ It is not clear, whether the data payload was transmitted correctly and therefor
 \section{Implementation}
 \label{sec:implementation}
 
-Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that creates and sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
-Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through the following design decisions.
-
-In the following sections, both the implementation of the Android application and the Contiki process are described in more detail.
+Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
+Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through tweaks. 
+These tweaks will be pointed out in the following subsections.
 
 \subsection{Android app}
 \label{sub:android_app}
 
-We have developed two different versions of the Android application, which enable users to enter keys and transmit them.
+We have developed two different versions of the Android application, which enable users to enter keying material and transmit it.
 The first version is written using web technologies (i.e. HTML, CSS, and JavaScript) and deployed to the smartphone using Apache~Cordova\footnote{https://cordova.apache.org/}.
 Because of this, the application can also run in most desktop browsers and can easily be ported to work with other smartphone operating systems, too, e.g. iOS or Windows Phone.
 There are two disadvantages of this implementation, which motivated us to build a second edition:
@@ -278,15 +287,15 @@ Furthermore the timing accuracy was considerably limited due to the overhead cau
 \begin{figure}
 	\centering
 	\includegraphics[scale=.15]{images/screen_native.png}
-	\caption{Screenshot of the native Android application used to encode the key and emit it as light flickering. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. For demonstration purposes, any text entered in the text field can be transmitted by tapping on ``Start''. While transmitting, the user gets feedback about the current phase right above the buttons.}
+	\caption{Screenshot of the Java implementation of our Android application used to enter keying material and emit it as light flickering. For demonstration purposes, any text can be entered as keying material. With a toggle switch the user can choose if the flashlight or the screen should flicker. The length of one bit can be adjusted using a slider. While transmitting, the user gets feedback about the current phase right above the buttons.}
 	\label{fig:screenshot}
 \end{figure}
 
-To improve transmission reliability, we therefore built a native Android application written in Java.
+To improve transmission reliability, we therefore built an Android application written in Java.
 Still, on Android, it is impossible to guarantee real-time behavior, but we get smaller delays without JavaScript involved.
-As to bee seen in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
-This is just a prove of concept, a real key should be a random 128~bit string which needs to be generated and saved for later usage, which is out of scope of this paper.
-This Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
+As depicted in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
+Note that this is just a prove of concept - a real key should be a random bit string.
+Our Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In effect, the smartphone and the mote do not get out of sync, no matter how long the transmission takes.
 Another advantage of this version is the flashlight.
 Depending on the smartphone model, the flashlight is as fast as screen flickering even for small bit lengths, while being much brighter.
@@ -297,9 +306,9 @@ Especially when attempting to program multiple motes at once this comes in very 
 \label{sub:mote}
 
 The implementation on the mote is divided into two parts.
-First, the communication protocol and key storage is implemented in a Contiki process.
-Second, for the mote to securely communicate, the implementation of link layer security needs to be initialized using the transmitted key.
-This is accomplished by a link layer driver wrapper around link layer security.
+First, the communication protocol and storage of keying material is implemented in a Contiki process.
+Second, for the mote to securely communicate, the implementation of link layer security needs to be provisioned with the transmitted keying material.
+This is accomplished by a wrapper around link layer security.
 
 \subsubsection{Contiki process}
 \label{ssub:contiki_process}
@@ -318,38 +327,37 @@ A green LED shows that the keying material has been received successfully and wa
 \subsubsection{Wrapper}
 \label{ssub:contiki_driver_wrapper}
 
-For the mote to actually use the keying material that was transmitted, the initialization of the link layer security needs to be delayed until the transmission finished successfully.
-To do so we created a link layer driver wrapper that accomplishes the following things:
+For the mote to actually use the keying material that was transmitted, the startup of link layer security needs to be delayed until the transmission finished successfully.
+To do so, we created a link layer security wrapper that accomplishes the following things:
 
 \begin{enumerate}
-	\item Delay all calls to the link layer driver if the mote was not provisioned with keying material before.
+	\item Ignore all calls to link layer security if the mote was not provisioned with keying material before.
 	\item Start the \textit{light process} and wait for successful transmission.
-	\item Initialize the link layer using the transmitted keying material.
+	\item Initialize link layer security using the transmitted keying material.
 	\item Forward all calls to the link layer driver.
 \end{enumerate}
 
-Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer driver wrapper.
-At the first start of the mote, the keying material initialization via the \textit{light process} is triggered whereas during later starts the mote recognizes that its keying material has been initialized before.
+Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer security wrapper.
+At the first start of the mote, the keying material provisioning via the \textit{light process} is triggered whereas during later starts the mote recognizes that its keying material has been provisioned before.
 
 
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
 
-Having a configurable transmission rate was very helpful during development and testing.
-However it certainly introduces possible errors as the mote has to recognize the correct transmission rate, otherwise the initialization procedure will fail.
-We decided against fixating it, as during our experiments the mote in all cases determined the correct transmission rate.
-Also while testing different Android phones, we noticed each of it works best with a different transmission rate, so the app should change it depending on the phone model.
+In the following, we discuss experiments that we conducted to determine the success ratio of transmissions when using the Java implementation of our Android app. 
+It turns out that fixing the transmission rate $T$ is inappropriate because different Android phones work best at different transmission rates. 
+However, having a configurable transmission rate certainly introduces possible errors as motes have to recognize $T$. 
+Despite this, motes correctly recognized $T$ throughout all our experiments.
 
 Figure~\ref{fig:successful_transmissions} shows the number of successful transmissions plotted against different transmission rates.
 We used two different phones for measuring those values.
 One is a \textit{Samsung Galaxy S2}, the other one is a \textit{Samsung Galaxy A3}.
 As we can see, the \textit{A3} is able to send data at a considerabley higher transmission rate than the \textit{S2}.
 While the \textit{A3} transmits reliably with a period length of 15ms, the \textit{S2} should not be used with a period length less than 62ms.
-One reason for that could be that the \textit{A3} is considerably newer compared to the \textit{S2}.
 
 We also tested the transmission reliability with a \textit{Motorola MotoG (2nd generation)} and an \textit{LG Nexus 5}.
 Both showed very poor performance at arbitrary period lengths.
-One possible explanation for this is, that the CPU of those phones is saving energy too aggressively.
+A possible explanation for this is, that the CPU of those phones is saving energy too aggressively.
 This effect was already seen in \cite{mongia2010reliable}.
 Different phone models seem to be affected differently by that.
 The flashlight of the \textit{LG Nexus 5} could not be used at all for transmission as it is only capable to flash around two times per second.
@@ -378,7 +386,7 @@ Therefore, the \textit{Hamming(8,4)-code} is not useful in that case.
 \section{Conclusion and Future Work}
 \label{sec:future_work}
 
-In this paper, we presented a secure method for IoT-device initialization by transmitting initial keying material via light.
+In this paper, we have presented a secure method for provisioning IoT devices by transmitting initial keying material and parameters via light.
 It mainly targets private users and can easily be executed having no technical background at all.
 As the visibility of light can be judged and restricted pretty well by end users, security against interception is given.
 A challenge is that transmission reliability is heavily affected by the smartphone model that is used to provision the keying material.
@@ -386,7 +394,7 @@ A challenge is that transmission reliability is heavily affected by the smartpho
 Future work should target the further automation of the presented method, e.g. by establishing a bidirectional communication.
 Using its camera the mobile phone could detect the current LED-state of the mote and react accordingly, e.g. start the data transmission or restart the whole process.
 
-To simplify the initialization of several motes at once, two things need to be done.
+To simplify the provisioning of several motes at once, two things need to be done.
 First, the Android application should stay in calibration and synchronization phase, until the user presses a button.
 Second, each mote should indicate via an LED that it reached the initialization phase.
 With those two concepts, the key provisioning to several motes could work as follows:
@@ -403,6 +411,8 @@ However, this is not implemented and tested yet and could be part of future proj
 
 % Bibliography
 % \bibliographystyle{ACM-Reference-Format-Journals}
+
+\balance
 \bibliographystyle{abbrv}
 \bibliography{paper}
 
