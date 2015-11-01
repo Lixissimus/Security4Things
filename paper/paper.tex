@@ -68,14 +68,11 @@ The rise of the Internet of Things (IoT) is associated with an enormous increase
 In order to avoid privacy issues and security threats those devices have to communicate securely using state-of-the-art encryption techniques.
 However, these techniques often rely on predistributed keying material.
 The secure and user-friendly provisioning of the initial keying material \textit{before} securing techniques are operational remains a major problem.
-
 We propose a secure method for provisioning IoT-devices with keying material via light.
 The transmission can be executed using an off-the-shelf smartphone and does not require any technical expertise.
 \end{abstract}
 
 \category{K.6.5}{Management Of Computing And Information Systems}{Security}
-
-\terms{Internet of Things, Security}
 
 \keywords{Internet of Things, security, key provisioning, light}
 
@@ -83,20 +80,20 @@ The transmission can be executed using an off-the-shelf smartphone and does not 
 \label{sec:introduction}
 
 The Internet of Things (IoT) is becoming more and more of a reality every day.
-It consists of small devices (henceforth called \textit{motes}), which are connected to the public Internet, \cite{atzori2010internet}.
+It consists of small devices (henceforth called \textit{motes}), which are connected to the public Internet~\cite{atzori2010internet}.
 They work together, allowing monitoring and controlling of several kinds of real-world systems.
 An example are motes collecting information about parking lot occupancy, allowing car drivers to find free spaces using their smartphones\footnote{see http://www.streetline.com/}.
 
 However, by being accessible from the Internet, the attack surface of such systems is much larger than that of traditional embedded systems.
 New security measures were developed and implemented to react to this.
-For example, \textit{Adaptive Key Establishment Scheme (AKES)} provides adaptable security measures for being used with the IEEE 802.15.4 network stack, which is commonly used by IoT devices, \cite{krentz15akes}.
+For example, the \textit{Adaptive Key Establishment Scheme (AKES)} provides adaptable security measures for being used with the IEEE 802.15.4 network stack, which is commonly used by IoT devices~\cite{krentz15akes}.
 Nevertheless, one problem remains: IoT setups usually consist of many nodes which all need to be provisioned with keying material and parameters.
 This is a major problem, because typical motes lack input/output devices that are securely usable without configured networking.
 
 \begin{figure}
 	\centering
 	\includegraphics[scale=.4]{images/overview.png}
-	\caption{Transmission of keying material with light: \textbf{a)} enter enter keying material and parameters on a smartphone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist keying material and parameters, \textbf{d)} communicate securely via the public Internet }
+	\caption{Transmission of keying material with light: \textbf{a)} enter keying material and parameters on a smartphone, \textbf{b)} transmit them via light to the mote, \textbf{c)} persist keying material and parameters, \textbf{d)} communicate securely via the public Internet }
 	\label{fig:overview}
 \end{figure}
 
@@ -120,14 +117,14 @@ The physics of light is well understood by non-technical people, in contrast to 
 Thus, leaking of the wirelessly sent secrets is less likely.
 Moreover, multiple devices could be initialized concurrently by just placing them next to each other.
 
-We implemented a prototype for an Android smartphone and a mote running the Contiki OS, \cite{dunkels04contiki}.
+We implemented a prototype for an Android smartphone and a mote running the Contiki OS~\cite{dunkels04contiki}.
 Contiki is an open source, state-of-the-art operating system for IoT devices\footnote{http://www.contiki-os.org/}.
 We also tested techniques to make the transmission reliable.
 Besides, we examined how fast the whole transmission could become while maintaining a high chance of correctness.
 
 The remainder of the paper is structured as follows:
 Section~\ref{sec:related_work} contains some background for security in the context of the~IoT and alternative approaches for key provisioning.
-In Section~\ref{sec:communication_protocol}, we propose our protocol for the smartphone and the mote to communicate via light.
+In Section~\ref{sec:communication_protocol}, we propose our protocol for a smartphone and a mote to communicate via light.
 Details of our implementations are presented in Section~\ref{sec:implementation}, both for the emitting~(Section~\ref{sub:android_app}) and the receiving~(Section~\ref{sub:mote}) parts.
 In Section~\ref{sec:results_and_discussion}, we discuss our findings regarding the protocol and its limits.
 In Section~\ref{sec:future_work}, we conclude our work and give suggestions for future research.
@@ -137,34 +134,27 @@ In Section~\ref{sec:future_work}, we conclude our work and give suggestions for 
 \label{sec:related_work}
 
 There are multiple approaches to key provisioning that secure the radio channel in some way, e.g.:
-
-\cite{chen2011over} proposes key provisioning using eliptic curve cryptography (ECC).
+Chen et al. proposed key provisioning using eliptic curve cryptography (ECC)~\cite{chen2011over}.
 However, while meeting high security standards, software implementations of ECC require a lot of memory and energy while hardware implementations increase the per-unit cost.
 Moreover, they do not explain how public keys are provisioned.
-
-In order to secure radio communication, \cite{kuo2007message} utilized a Faraday cage in which a batch of motes can be programmed without leaking messages to attackers outside of the cage.
+In order to secure radio communication, Kuo et al. utilized a Faraday cage in which a batch of motes can be programmed without leaking messages to attackers outside of the cage~\cite{kuo2007message}.
 Additionally, another device outside of the cage jams radio waves to prevent malicious communication.
-
-\textit{6doku} is a protocol for pairing  a mote with a touch-enabled device like a smartphone, \cite{krentz20156doku}.
+\textit{6doku} is a protocol for pairing  a mote with a touch-enabled device like a smartphone~\cite{krentz20156doku}.
 The smartphone needs extra hardware attached to communicate with the mote via radio waves.
 It relies on interaction with the end-user as he needs to check if blinking on the screen happens in sync with him pressing a button on the mote.
 
 There are also some proposals for key predistribution using an alternative channel, i.e. light:
-
-\cite{saxena2009blink} proposed to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels.
+Saxena et al. proposed to generate public keys on the mote(s) and transfer them to a \textit{sink} via standard radio channels~\cite{saxena2009blink}.
 They are verified afterwards using the unidirectional light channel from the motes to the sink.
 However, they still rely on energy consuming asymmetric encryption.
-
-\textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote, \cite{doan2012lidsn}.
+\textit{Light Communication for Deploying Secure Wireless Sensor Networks (LiDSN)} is an approach to assign a node id and a secret key to a mote~\cite{doan2012lidsn}.
 Therefore, a temporal key for radio communication is transmitted to a specialized \textit{connector} via light.
 The communication via light can be either way: if the connector receives light from a mote's LED, it reads it. 
 If the mote has no LED, a light sensor is assumed and the connector emits light with an own LED.
 They showed, that key provisioning is both faster and easier for end users.
-
-\cite{electricimp} sells proprietary BlinkUp~\texttrademark  technology.
-Instead of specialized hardware which end users might not want to buy, they provide a smartphone application which provisions a mote.
+\textit{ElectricIMP} sells a proprietary BlinkUp\texttrademark~technology~\cite{electricimp}.
+Instead of specialized hardware, which end users might not want to buy, they provide a smartphone application which provisions a mote.
 Assuming most users who install IoT setups already own a smartphone, this seems to be a cost-effective alternative.
-
 However, we could not find that this approach was examined scientifically.
 We address this and propose a protocol for secure and wireless key provisioning using a smartphone as a light emitter and motes with light sensors as receivers.
 
@@ -182,7 +172,7 @@ The goal of the calibration phase is to establish light values for \textit{brigh
 By doing this at the beginning of the protocol, we can adapt to different lighting situations in the room and different brightness levels of the smartphone.
 
 The task of the smartphone in this protocol stage is to periodically send \textit{bright} and \textit{dark} values, each with a certain period length $T$.
-Simply said, it is blinking by flashing of the display or the flash light.
+Simply said, it is blinking by flashing of the display or the flashlight.
 
 The mote on the other side measures $n$ light values using its light sensor.
 The time between two measurements will probably not be equal to $T$, because the period length is unknown to the mote at this point.
@@ -204,13 +194,13 @@ The mote on the other hand now measures light values as fast as it can and class
 Once it notices that the bit flips, it records the time when the switch happened.
 After recording $m$ bit flips, it can calculate the average period length.
 
-With completion of the first two phases, the mote is now able to read data sent by the phone.
+With the completion of the first two phases, the mote is now able to read data sent by the phone.
 It learned a decision threshold for decoding the bits and the period length to read values at the right time.
 Figure~\ref{fig:read_a_bit} shows how data can be read.
 
 \begin{figure}
 	\centering
-	\includegraphics[scale=.5]{images/reading_data.png}
+	\includegraphics[scale=.4]{images/reading_data.png}
 	\caption{Reading data: The black horizontal lines show the brightness emitted by the phone, the red line is the decision threshold for classifying \textit{0} and \textit{1}. Each arrow shows a point in time where the mote reads the value of the light sensor. The result here is the bit string 0111.}
 	\label{fig:read_a_bit}
 \end{figure}
@@ -229,14 +219,14 @@ The pattern must be different from $0101...$ and needs to have a length of one b
 It sends the pattern exactly once, then it proceeds with the next phase.
 
 After successful synchronization, the mote waits for the initialization pattern.
-It does that by reading single bits and comparing the last 8~bits (for ASCII encoding) to the predefined pattern.
+It does that by reading single bits and comparing the last 8~bits to the predefined pattern.
 Once the initialization pattern has been detected, the mote immediately switches to the data sending phase.
 
 \subsection{Data sending}
 \label{sub:data_sending}
 
 In the data sending phase, the smartphone finally transmits a data packet, which provisions the mote with keying material and parameters.
-As shown in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum used for validation of the received data in the validation phase (Section~\ref{sub:validation}).
+As shown in Figure~\ref{fig:data_packet}, the packet contains the data length, the actual data and a checksum for validation of the received data in the validation phase (Section~\ref{sub:validation}).
 
 The smartphone encodes the data string (e.g. ASCII encoding), measures its binary length and calculates the checksum.
 All data that is being sent is encoded with a \textit{Hamming(8,4)-code} so that two-bit errors can be detected and one-bit errors can be corrected.
@@ -269,7 +259,7 @@ It is not clear, whether the data payload was transmitted correctly and therefor
 \section{Implementation}
 \label{sec:implementation}
 
-Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it, \cite{dunkels04contiki}, \cite{telosb}.
+Our implementation consists of an Android application\footnote{https://github.com/0x203/Flickerer/} that sends the keying material and a Contiki process\footnote{https://github.com/Lixissimus/Security4Things} that runs on a TelosB sky mote and receives and validates it~\cite{telosb}.
 Both follow the aforementioned communication protocol very closely, but increase reliability and fail-safeness through tweaks. 
 These tweaks will be pointed out in the following subsections.
 
@@ -282,7 +272,7 @@ Because of this, the application can also run in most desktop browsers and can e
 There are two disadvantages of this implementation, which motivated us to build a second edition:
 The flashlight cannot be controlled reliably using the mentioned web technologies.
 This forced us to use the screen for light emission, which resulted in far smaller brightness margins to be read by the mote.
-Furthermore the timing accuracy was considerably limited due to the overhead caused by the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
+Furthermore the timing accuracy was considerably limited due to the overhead of the Cordova runtime and the JavaScript interpreter which resulted in transmission errors.
 
 \begin{figure}
 	\centering
@@ -293,7 +283,7 @@ Furthermore the timing accuracy was considerably limited due to the overhead cau
 
 To improve transmission reliability, we therefore built an Android application written in Java.
 Still, on Android, it is impossible to guarantee real-time behavior, but we get smaller delays without JavaScript involved.
-As depicted in Fig.~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
+As depicted in Figure~\ref{fig:screenshot}, any entered text will be ASCII-encoded and transmitted.
 Note that this is just a prove of concept - a real key should be a random bit string.
 Our Java implementation benefits from the ability of the native Java timer to re-adjust itself, which means that timing inaccuracies do not add up.
 In effect, the smartphone and the mote do not get out of sync, no matter how long the transmission takes.
@@ -315,26 +305,26 @@ This is accomplished by a wrapper around link layer security.
 
 The \textit{light process} implements the receiving side of the communication protocol.
 A real-time timer called \textit{rtimer}, which is offered by the Contiki operating system, eliminates timer inaccuracies on the mote side.
-As the Android timer that triggers the bit emission is never too early but in fact tends to be a little late\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
+As the Android timer that triggers the bit emission is never too early but in fact tends to be a little late~\cite{mongia2010reliable}, the time at which the mote reads a bit is not in the middle of a period as suggested by Figure~\ref{fig:read_a_bit}.
 It is at the very end of a period to maximize error avoidance due to timer delays.
 The mote uses its light sensor to sense the current brightness.
 
 Once the light process is started, an LED-countdown (red $\rightarrow$ blue $\rightarrow$ green) indicates the start of the key provisioning procedure.
-After the successful calibration, synchronization and initialization a blue LED indicates that the mote is receiving data.
+After the successful calibration, synchronization and initialization, a blue LED indicates that the mote is receiving data.
 If an error is detected by the Hamming-code or if the computed checksum does not match the transmitted one, a red LED indidcates the error and the process should be restarted.
-A green LED shows that the keying material has been received successfully and was saved to the permanent flash memory of the mote.
+A green LED shows that the keying material was received successfully and was saved to the permanent flash memory of the mote.
 
 \subsubsection{Wrapper}
 \label{ssub:contiki_driver_wrapper}
 
 For the mote to actually use the keying material that was transmitted, the startup of link layer security needs to be delayed until the transmission finished successfully.
-To do so, we created a link layer security wrapper that accomplishes the following things:
+To do so, we created a link layer security wrapper that accomplishes the following tasks:
 
 \begin{enumerate}
 	\item Ignore all calls to link layer security if the mote was not provisioned with keying material before.
-	\item Start the \textit{light process} and wait for successful transmission.
+	\item Start the \textit{light process} if necessary and wait for successful transmission.
 	\item Initialize link layer security using the transmitted keying material.
-	\item Forward all calls to the link layer driver.
+	\item Forward all calls to the link layer driver once keying material is in place.
 \end{enumerate}
 
 Including the light app on a mote automatically redefines \textit{NETSTACK\_CONF\_LLSEC}\footnote{This global constant defines the link layer driver that is used by the mote.} to point to our link layer security wrapper.
@@ -344,7 +334,8 @@ At the first start of the mote, the keying material provisioning via the \textit
 \section{Results and Discussion}
 \label{sec:results_and_discussion}
 
-In the following, we discuss experiments that we conducted to determine the success ratio of transmissions when using the Java implementation of our Android app. 
+In the following, we discuss experiments that we conducted to determine the success ratio of transmissions when using the Java implementation of our Android app.
+Thereby, we used the phones flashlight unless otherwise mentioned.
 It turns out that fixing the transmission rate $T$ is inappropriate because different Android phones work best at different transmission rates. 
 However, having a configurable transmission rate certainly introduces possible errors as motes have to recognize $T$. 
 Despite this, motes correctly recognized $T$ throughout all our experiments.
@@ -370,13 +361,13 @@ The flashlight of the \textit{LG Nexus 5} could not be used at all for transmiss
 \end{figure}
 
 Subject of debate is also the \textit{Hamming(8,4)-code}.
-While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data to be sent.
+While it is able to correct one-bit-errors and detect two-bit-errors, it also doubles the amount of data being sent.
 When analyzing the number of corrected bits depending on the transmission rate, the following can be shown:
 With long period lengths, the Hamming code does not detect or correct any errors, because the transmission happens without any errors.
 When accelerating the transmission, there is a point where many bits are corrected, but the transmission normally succeeds.
-If the transmission speed is then set even higher, the whole transmission fails most of the time due to irrecoverable errors.
 The borders are 15ms for the \textit{A3} and 63ms for the \textit{S2} (see Figure~\ref{fig:successful_transmissions}).
-When we want to achieve the transmission speed of the \textit{A3} with 15ms, we can either use the 15ms and Hamming encoding to correct the bits, or we can halve the amount of data by deactivating the Hamming encoding and transmit with 31ms per bit\footnote{The values are rounded, that is why the half of 31 is 15.}.
+If the transmission speed is then set even higher, the whole transmission fails most of the time due to irrecoverable errors.
+When we want to achieve a period length of 15ms with the \textit{A3}, we can either use the 15ms and Hamming encoding to correct the bits, or we can halve the amount of data by deactivating the Hamming encoding and transmit with 31ms per bit\footnote{The values are rounded, that is why the half of 31 is 15.}.
 So the transmission takes the same time, but actually increases the percentage of successful transmissions.
 Errors can still be detected afterwards using the \textit{CRC32} checksum.
 Therefore, the \textit{Hamming(8,4)-code} is not useful in that case.
